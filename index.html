@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Logiciel Matrice PSS - Base Complète Réactive</title>
+    <title>Logiciel Matrice PSS - Base Complète avec Recherche Risques</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
         /* Style pour masquer les barres de défilement des menus déroulants */
@@ -39,7 +39,7 @@
                         🛡️ Logiciel d'Analyse des Risques & PSS Multi-Filtres
                     </h1>
                     <p class="text-slate-400 text-xs mt-0.5">
-                        Sélectionnez vos activités pour générer instantanément les activités sources correspondantes.
+                        Filtrez par Activités, par Sources ou recherchez directement par type de Risque.
                     </p>
                 </div>
                 <div class="bg-emerald-500/10 border border-emerald-400/20 px-3 py-1.5 rounded-md text-xs text-emerald-300 self-start sm:self-center">
@@ -53,10 +53,10 @@
         
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 mb-6 no-print">
             <h2 class="text-xs font-bold uppercase tracking-wider text-indigo-600 mb-4 flex items-center gap-1.5">
-                🔍 Sélection des Activités et Sources de Risques
+                🔍 Outils de Sélection et Localisation des Risques
             </h2>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 
                 <div class="relative">
                     <label class="block text-xs font-semibold text-slate-700 mb-1.5">
@@ -85,13 +85,34 @@
                     </div>
                 </div>
 
+                <div class="relative flex flex-col">
+                    <label class="block text-xs font-semibold text-slate-700 mb-1.5">
+                        3. Recherche Risque (<span id="count-risks">0</span> coché(s)) :
+                    </label>
+                    <div class="relative mb-2">
+                        <input type="text" id="risk-search-input" oninput="filterRiskList()" placeholder="Saisir un risque (ex: Chute, Électrocution...)" class="w-full text-xs border border-slate-300 rounded-lg p-2 bg-white focus:outline-indigo-500">
+                        <span class="absolute right-2.5 top-2.5 text-xs opacity-40">🔍</span>
+                    </div>
+                    <div class="border border-slate-300 rounded-lg bg-slate-50 p-2 max-h-48 overflow-y-auto custom-scrollbar space-y-1 flex-grow" id="risk-multichoice-list">
+                        </div>
+                    <div class="flex gap-2 mt-1.5 justify-end">
+                        <button onclick="clearRiskSelection()" class="text-[10px] text-rose-600 hover:underline font-medium cursor-pointer">Réinitialiser les risques</button>
+                    </div>
+                </div>
+
+            </div>
+
+            <div id="risk-location-box" class="hidden mt-4 pt-3 border-t border-dashed border-slate-200">
+                <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">📍 Emplacement des risques sélectionnés :</div>
+                <div id="risk-locations-container" class="flex flex-wrap gap-2">
+                    </div>
             </div>
         </div>
 
         <div id="empty-state" class="text-center py-16 bg-white rounded-xl border border-slate-200 shadow-sm no-print">
             <div class="text-4xl mb-3">📊</div>
             <h3 class="text-sm font-semibold text-slate-900">Aucune donnée à afficher</h3>
-            <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">Cochez vos activités générales puis vos activités sources pour construire dynamiquement votre tableau PSS.</p>
+            <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">Utilisez les filtres d'activités ou cochez des risques spécifiques pour générer dynamiquement votre tableau PSS.</p>
         </div>
 
         <div id="results-section" class="hidden bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden print-full-width">
@@ -127,17 +148,17 @@
 
     <footer class="bg-white border-t border-slate-200 py-3 mt-auto no-print">
         <div class="max-w-7xl mx-auto px-4 text-center text-[11px] text-slate-500 sm:px-6 lg:px-8">
-            Matrice PSS &bull; Version logicielle à filtres croisés automatisés.
+            Matrice PSS &bull; Recherche croisée par risques et activités intégrée.
         </div>
     </footer>
 
     <script>
-        // Base de données complète re-structurée issue rigoureusement de PSS.txt
+        // Base de données complète re-structurée issue de PSS.txt
         const database = {
             "gros_oeuvre": {
                 label: "Gros Œuvre",
                 sources: {
-                    "inst_chantier": { label: "Installation de chantier", items: [{ risque: "Chute de plain-pied", mesures: "Maintenir les accès dégagés, assurer le nettoyage régulier et mettre en place un balisage adapté.", controles: "Contrôle quotidien des circulations, vérification du rangement et de l’éclairage." }, { risque: "Circulation engins/piétons", mesures: "Mettre en place un plan de circulation séparant les zones piétons et engins.", controles: "Vérification du balisage, contrôle des voies de circulation et respect des consignes." }] },
+                    "inst_chantier": { label: "Installation de chantier", items: [{ risque: "Chute de plain-pied", mesures: "Maintenir les accès dégagés, assurer le nettoyage regular et mettre en place un balisage adapté.", controles: "Contrôle quotidien des circulations, vérification du rangement et de l’éclairage." }, { risque: "Circulation engins/piétons", mesures: "Mettre en place un plan de circulation séparant les zones piétons et engins.", controles: "Vérification du balisage, contrôle des voies de circulation et respect des consignes." }] },
                     "terrassement": { label: "Terrassement", items: [{ risque: "Effondrement de fouille", mesures: "Prévoir blindage ou talutage des fouilles selon la profondeur et la nature du terrain.", controles: "Contrôle quotidien des parois et inspection après intempéries." }, { risque: "Réseaux enterrés", mesures: "Réaliser les DICT et localiser les réseaux avant terrassement.", controles: "Vérification des plans réseaux et contrôle du marquage au sol." }, { risque: "Renversement engin", mesures: "Utiliser des engins adaptés au terrain et respecter les charges admissibles.", controles: "Contrôle de stabilité des sols et vérification autorisations conducteurs." }] },
                     "fouilles": { label: "Fouilles", items: [{ risque: "Chute dans excavation", mesures: "Installer garde-corps et accès sécurisés autour des fouilles.", controles: "Contrôle des protections collectives et accès sécurisés." }] },
                     "coffrage": { label: "Coffrage", items: [{ risque: "Chute de hauteur", mesures: "Installer garde-corps, lignes de vie et équipements antichute.", controles: "Vérification quotidienne des protections et du port du harnais." }, { risque: "Effondrement coffrage", mesures: "Vérifier la stabilité des coffrages avant bétonnage.", controles: "Inspection technique des coffrages avant mise en charge." }] },
@@ -183,7 +204,7 @@
                     "trav_passerelle": { label: "Travail sur passerelle", items: [{ risque: "Rupture ou glissade", mesures: "Vérifier l’état des supports, planchers et équipements d’accès.", controles: "Inspection des équipements avant utilisation." }] },
                     "trav_charpente": { label: "Travail sur charpente", items: [{ risque: "Perte d’appui", mesures: "Maintenir des surfaces de travail stables et dégagées.", controles: "Contrôle de la stabilité et du rangement des zones de travail." }] },
                     "depl_haut": { label: "Déplacement en hauteur", items: [{ risque: "Faux mouvement", mesures: "Former le personnel aux gestes sécurisés et au travail en hauteur.", controles: "Contrôle des formations et observation terrain." }] },
-                    "dep_prot_coll": { label: "Dépose protections collectives", items: [{ risque: "Exposition au vide", mesures: "Installer des protections collectives avant toute intervention.", controles: "Vérification des protections avant démarrage des travaux." }] }
+                    "dep_prot_coll": { label: "Dépose protections collectives", items: [{ risque: "Exposition au vide",炫: "Installer des protections collectives avant toute intervention.", controles: "Vérification des protections avant démarrage des travaux." }] }
                 }
             },
             "terrassement": {
@@ -216,7 +237,7 @@
                 sources: {
                     "trav_haut_c": { label: "Travail en hauteur", items: [{ risque: "Chute d’outils", mesures: "Attacher les outils utilisés en hauteur et sécuriser les zones de travail.", controles: "Vérification des attaches-outils et du balisage des zones." }] },
                     "trav_echaf_c": { label: "Travail sur échafaudage", items: [{ risque: "Chute de matériaux", mesures: "Organiser un stockage stable et sécurisé des matériaux.", controles: "Contrôle de la stabilité des stockages et des protections périphériques." }] },
-                    "lev_mat_c": { label: "Levage de matériel", items: [{ risque: "Chute de charge",炫: "Contrôler les accessoires de levage et interdire l’accès sous les charges.", controles: "Vérification des élingues et des zones interdites." }] },
+                    "lev_mat_c": { label: "Levage de matériel", items: [{ risque: "Chute de charge", mesures: "Contrôler les accessoires de levage et interdire l’accès sous les charges.", controles: "Vérification des élingues et des zones interdites." }] },
                     "manut_haut": { label: "Manutention en hauteur", items: [{ risque: "Perte de matériel", mesures: "Ranger et fixer correctement le matériel sur les postes de travail.", controles: "Contrôle du rangement et de la fixation du matériel." }] },
                     "stock_haut": { label: "Stockage en hauteur", items: [{ risque: "Chute d’objets stockés", mesures: "Empiler les matériaux de manière stable et sécurisée.", controles: "Inspection des zones de stockage et stabilité des charges." }] },
                     "util_grue": { label: "Utilisation grue", items: [{ risque: "Décrochage charge", mesures: "Utiliser des systèmes d’élingage conformes et adaptés à la charge.", controles: "Contrôle des élingues, crochets et accessoires de levage." }] },
@@ -347,7 +368,7 @@
                     "pluie_sol": { label: "Forte pluie - Sol", items: [{ risque: "Sol glissant", mesures: "Nettoyer et sécuriser les accès en cas d’intempéries.", controles: "Contrôle quotidien des cheminements et accès chantier." }] },
                     "pluie_fouille": { label: "Forte pluie - Fouilles", items: [{ risque: "Inondation fouilles", mesures: "Prévoir un pompage et drainage des fouilles.", controles: "Contrôle des systèmes de pompage et état des fouilles." }] },
                     "vent_chute": { label: "Vent fort - Chute d'objets", items: [{ risque: "Chute d’objets", mesures: "Suspendre les travaux en hauteur en cas de vent fort.", controles: "Contrôle météo et application des consignes d’arrêt." }] },
-                    "vent_deseq": { label: "Vent fort - Déséquilibre", items: [{ risque: "Déséquilibre travail hauteur", mesures: "Arrêter les travaux en hauteur lors de conditions dangereuses.", controles: "Vérification météo et contrôle des accès en hauteur." }] },
+                    "vent_deseq": { label: "Vent fort - Déséquilibre", items: [{ risque: "Déséquilibre travail hauteur", mesures: "Arrêter les travaux en hauteur lors de conditions dangereuses.", controles: "Vérification bulletins météo et contrôle des accès en hauteur." }] },
                     "temp_elevee": { label: "Température élevée", items: [{ risque: "Coup de chaleur", mesures: "Prévoir hydratation, pauses et adaptation des horaires.", controles: "Contrôle disponibilité eau potable et pauses." }] },
                     "exp_soleil": { label: "Exposition soleil", items: [{ risque: "Insolation", mesures: "Mettre à disposition des zones ombragées et protections solaires.", controles: "Contrôle des équipements de protection et zones de repos." }] },
                     "temp_neg": { label: "Température négative", items: [{ risque: "Verglas", mesures: "Déneiger et saler les accès chantier.", controles: "Contrôle de l’état des accès et traitement des surfaces." }] },
@@ -471,6 +492,7 @@
         // Tableaux de stockage des états cochés
         let checkedMainKeys = [];
         let checkedSourceKeys = [];
+        let checkedRisks = []; // Stocke les noms de risques cochés
 
         // Éléments DOM
         const mainDropdown = document.getElementById('main-dropdown');
@@ -478,11 +500,29 @@
         const sourceActions = document.getElementById('source-actions');
         const countMain = document.getElementById('count-main');
         const countSource = document.getElementById('count-source');
+        const countRisks = document.getElementById('count-risks');
+        const riskSearchInput = document.getElementById('risk-search-input');
+        const riskMultichoiceList = document.getElementById('risk-multichoice-list');
+        const riskLocationBox = document.getElementById('risk-location-box');
+        const riskLocationsContainer = document.getElementById('risk-locations-container');
         const emptyState = document.getElementById('empty-state');
         const resultsSection = document.getElementById('results-section');
         const tableBody = document.getElementById('table-body');
 
-        // 1. Initialise la liste des Activités Générales avec des cases à cocher
+        // Extraire la liste unique de tous les risques possibles de la BDD
+        function getAllUniqueRisks() {
+            const risks = new Set();
+            for (const mainKey in database) {
+                for (const srcKey in database[mainKey].sources) {
+                    database[mainKey].sources[srcKey].items.forEach(item => {
+                        risks.add(item.risque);
+                    });
+                }
+            }
+            return Array.from(risks).sort((a, b) => a.localeCompare(b, 'fr'));
+        }
+
+        // 1. Initialise le menu des Activités Générales
         function initMainDropdown() {
             mainDropdown.innerHTML = '';
             for (const key in database) {
@@ -492,13 +532,46 @@
                     <input type="checkbox" id="main-${key}" value="${key}" class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer">
                     <label for="main-${key}" class="text-xs font-medium text-slate-700 cursor-pointer select-none flex-grow">${database[key].label}</label>
                 `;
-                
                 div.querySelector('input').addEventListener('change', function() {
                     handleMainCheckboxChange(this.value, this.checked);
                 });
-                
                 mainDropdown.appendChild(div);
             }
+        }
+
+        // 2. Initialise le multichoix de recherche par risque
+        function initRiskMultichoice() {
+            const allRisks = getAllUniqueRisks();
+            riskMultichoiceList.innerHTML = '';
+            
+            allRisks.forEach((riskName, index) => {
+                const div = document.createElement('div');
+                div.className = "risk-item flex items-center gap-2 p-1 hover:bg-slate-200/60 rounded transition-colors";
+                div.setAttribute('data-risk-name', riskName.toLowerCase());
+                div.innerHTML = `
+                    <input type="checkbox" id="risk-${index}" value="${riskName}" class="w-4 h-4 rounded text-amber-600 focus:ring-amber-500 cursor-pointer">
+                    <label for="risk-${index}" class="text-xs text-slate-700 cursor-pointer select-none flex-grow">${riskName}</label>
+                `;
+                div.querySelector('input').addEventListener('change', function() {
+                    handleRiskCheckboxChange(this.value, this.checked);
+                });
+                riskMultichoiceList.appendChild(div);
+            } );
+        }
+
+        // Filtrage en direct de la liste des risques selon la saisie
+        function filterRiskList() {
+            const query = riskSearchInput.value.toLowerCase();
+            const riskItems = riskMultichoiceList.querySelectorAll('.risk-item');
+            
+            riskItems.forEach(item => {
+                const riskName = item.getAttribute('data-risk-name');
+                if (riskName.includes(query)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
         }
 
         // Action lors du clic sur une activité générale
@@ -507,17 +580,15 @@
                 if (!checkedMainKeys.includes(key)) checkedMainKeys.push(key);
             } else {
                 checkedMainKeys = checkedMainKeys.filter(k => k !== key);
-                // Si décoche parent, on supprime les enfants associés de la sélection active
                 const parentSources = Object.keys(database[key].sources);
                 checkedSourceKeys = checkedSourceKeys.filter(srcKey => !parentSources.includes(srcKey));
             }
-            
             countMain.textContent = checkedMainKeys.length;
             renderSourceDropdown();
             renderTable();
         }
 
-        // 2. Génère dynamiquement les sous-activités sources disponibles
+        // Génère dynamiquement les sous-activités sources disponibles
         function renderSourceDropdown() {
             if (checkedMainKeys.length === 0) {
                 sourceDropdown.innerHTML = `<div class="text-xs text-slate-400 italic p-1 text-center">Veuillez cocher au moins une activité générale à gauche.</div>`;
@@ -531,7 +602,6 @@
 
             checkedMainKeys.forEach(mainKey => {
                 const sources = database[mainKey].sources;
-                
                 const groupTitle = document.createElement('div');
                 groupTitle.className = "text-[10px] font-bold text-indigo-600 bg-indigo-50/80 px-1.5 py-0.5 rounded mt-2 first:mt-0";
                 groupTitle.textContent = database[mainKey].label.toUpperCase();
@@ -545,19 +615,15 @@
                         <input type="checkbox" id="src-${srcKey}" value="${srcKey}" ${isChecked ? 'checked' : ''} class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 cursor-pointer">
                         <label for="src-${srcKey}" class="text-xs text-slate-700 cursor-pointer select-none flex-grow">${sources[srcKey].label}</label>
                     `;
-
                     div.querySelector('input').addEventListener('change', function() {
                         handleSourceCheckboxChange(this.value, this.checked);
                     });
-
                     sourceDropdown.appendChild(div);
                 }
             });
-
             countSource.textContent = checkedSourceKeys.length;
         }
 
-        // Action lors du clic sur une activité source
         function handleSourceCheckboxChange(srcKey, isChecked) {
             if (isChecked) {
                 if (!checkedSourceKeys.includes(srcKey)) checkedSourceKeys.push(srcKey);
@@ -568,30 +634,85 @@
             renderTable();
         }
 
-        // 3. Moteur de rendu réactif pour la Matrice à 5 colonnes
-        function renderTable() {
-            tableBody.innerHTML = '';
+        // Action lors du clic sur un Risque (Multichoix)
+        function handleRiskCheckboxChange(riskName, isChecked) {
+            if (isChecked) {
+                if (!checkedRisks.includes(riskName)) checkedRisks.push(riskName);
+            } else {
+                checkedRisks = checkedRisks.filter(r => r !== riskName);
+            }
+            countRisks.textContent = checkedRisks.length;
+            updateRiskLocations();
+            renderTable();
+        }
+
+        // Analyse la BDD et affiche instantanément dans quelle activité et source se trouve le risque coché
+        function updateRiskLocations() {
+            riskLocationsContainer.innerHTML = '';
             
-            if (checkedMainKeys.length === 0) {
-                resultsSection.classList.add('hidden');
-                emptyState.classList.remove('hidden');
+            if (checkedRisks.length === 0) {
+                riskLocationBox.classList.add('hidden');
                 return;
             }
 
+            riskLocationBox.classList.remove('hidden');
+
+            checkedRisks.forEach(risk => {
+                // Trouver toutes les occurrences de ce risque dans la BDD
+                for (const mainKey in database) {
+                    for (const srcKey in database[mainKey].sources) {
+                        const hasRisk = database[mainKey].sources[srcKey].items.some(item => item.risque === risk);
+                        if (hasRisk) {
+                            const badge = document.createElement('div');
+                            badge.className = "inline-flex flex-col bg-amber-50 border border-amber-300 rounded px-2.5 py-1 text-[11px] text-amber-900 shadow-xs";
+                            badge.innerHTML = `
+                                <div><span class="font-bold">⚠️ ${risk}</span></div>
+                                <div class="text-[10px] text-slate-500">📍 Situé dans : <span class="font-semibold text-slate-700">${database[mainKey].label}</span> &gt; <span class="italic text-indigo-700">${database[mainKey].sources[srcKey].label}</span></div>
+                            `;
+                            riskLocationsContainer.appendChild(badge);
+                        }
+                    }
+                }
+            });
+        }
+
+        // Remise à zéro uniquement des filtres risques
+        function clearRiskSelection() {
+            checkedRisks = [];
+            countRisks.textContent = '0';
+            riskSearchInput.value = '';
+            const checkboxes = riskMultichoiceList.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(cb => cb.checked = false);
+            filterRiskList();
+            updateRiskLocations();
+            renderTable();
+        }
+
+        // Moteur de rendu réactif prenant en compte les Activités ET la sélection de risques
+        function renderTable() {
+            tableBody.innerHTML = '';
             let linesRendered = 0;
 
-            checkedMainKeys.forEach(mainKey => {
+            // Déterminer quelles clés d'activités explorer (si aucune activité cochée, on regarde toute la BDD)
+            const mainKeysToExplore = checkedMainKeys.length > 0 ? checkedMainKeys : Object.keys(database);
+
+            mainKeysToExplore.forEach(mainKey => {
                 const mainLabel = database[mainKey].label;
                 const sources = database[mainKey].sources;
 
                 for (const srcKey in sources) {
-                    // Si l'utilisateur a coché des sources, on filtre. Si aucune source cochée sur le parent, on affiche tout par défaut
+                    // Filtrage par activité source si applicable
                     if (checkedSourceKeys.length > 0 && !checkedSourceKeys.includes(srcKey)) {
                         continue;
                     }
 
                     const sourceData = sources[srcKey];
                     sourceData.items.forEach(item => {
+                        // Filtrage dynamique par risques : Si des risques sont cochés, la ligne doit correspondre à l'un d'eux
+                        if (checkedRisks.length > 0 && !checkedRisks.includes(item.risque)) {
+                            return;
+                        }
+
                         linesRendered++;
                         const tr = document.createElement('tr');
                         tr.className = "hover:bg-slate-50 transition-colors divide-x divide-slate-200 odd:bg-slate-50/30";
@@ -607,7 +728,12 @@
                 }
             });
 
-            if (linesRendered > 0) {
+            // Gestion d'affichage écran vide vs tableau complet
+            // Si l'utilisateur n'a absolument rien sélectionné (ni activité, ni risque), on force l'état d'attente
+            if (checkedMainKeys.length === 0 && checkedRisks.length === 0) {
+                resultsSection.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+            } else if (linesRendered > 0) {
                 emptyState.classList.add('hidden');
                 resultsSection.classList.remove('hidden');
             } else {
@@ -624,9 +750,7 @@
                 cb.checked = checkAll;
                 if (checkAll) checkedMainKeys.push(cb.value);
             });
-            
             if (!checkAll) checkedSourceKeys = [];
-            
             countMain.textContent = checkedMainKeys.length;
             renderSourceDropdown();
             renderTable();
@@ -644,8 +768,9 @@
             renderTable();
         }
 
-        // Initialisation automatique au chargement
+        // Initialisation globale au chargement de la page
         initMainDropdown();
+        initRiskMultichoice();
     </script>
 </body>
 </html>
