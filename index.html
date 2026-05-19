@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Logiciel de Génération Matrice PSS</title>
-    <!-- Chargement de Tailwind CSS v4 pour une interface moderne -->
+    <title>Logiciel de Génération Matrice PSS - Multi-Sélection</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
-        /* Optimisation rigoureuse pour l'impression papier et l'export PDF */
+        /* Optimisation pour l'impression et export PDF */
         @media print {
             body { background-color: #ffffff !important; color: #000000 !important; }
             .no-print { display: none !important; }
@@ -21,79 +20,74 @@
 </head>
 <body class="bg-slate-100 font-sans text-slate-800 antialiased min-h-screen flex flex-col">
 
-    <!-- En-tête de l'application (Masqué à l'impression) -->
     <header class="bg-slate-900 text-white shadow-md border-b border-indigo-500/20 no-print">
         <div class="max-w-7xl mx-auto px-4 py-5 sm:px-6 lg:px-8">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                     <h1 class="text-xl font-bold tracking-tight flex items-center gap-2">
-                        🛡️ Logiciel d'Analyse des Risques & PSS Complet
+                        🛡️ Logiciel d'Analyse des Risques & PSS (Multi-Sélection)
                     </h1>
                     <p class="text-slate-400 text-xs mt-0.5">
-                        Filtrage croisé par Activité et Activité Source avec rendu réglementaire sur 5 colonnes.
+                        Sélectionnez plusieurs activités et sources simultanément pour composer votre document de sécurité.
                     </p>
                 </div>
                 <div class="bg-indigo-500/10 border border-indigo-400/20 px-3 py-1.5 rounded-md text-xs text-indigo-300 self-start sm:self-center">
-                    Hébergement : <strong>GitHub Pages</strong>
+                    Mode : <strong>Multi-Filtres Actif</strong>
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- Zone Principale de l'application -->
     <main class="flex-grow max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8 w-full print-full-width">
         
-        <!-- Panneau de Sélection (Masqué à l'impression) -->
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 mb-6 no-print">
-            <h2 class="text-xs font-bold uppercase tracking-wider text-indigo-600 mb-4 flex items-center gap-1.5">
-                🔍 Paramètres de filtrage du Plan de Sécurité
-            </h2>
+            <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-2">
+                <h2 class="text-xs font-bold uppercase tracking-wider text-indigo-600 flex items-center gap-1.5">
+                    🎛️ Panneau de filtrage cumulatif
+                </h2>
+                <button id="btn-reset" class="text-xs text-slate-500 hover:text-red-600 font-medium transition-colors hidden" onclick="resetFilters()">
+                    ✕ Réinitialiser les filtres
+                </button>
+            </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- Sélecteur d'activité principale -->
+            <div class="space-y-5">
                 <div>
-                    <label for="main-activity" class="block text-xs font-semibold text-slate-700 mb-1.5">
-                        1. Sélectionner l'Activité Générale :
+                    <label class="block text-xs font-semibold text-slate-700 mb-2">
+                        1. Filtrer par Activité(s) Générale(s) :
                     </label>
-                    <select id="main-activity" class="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none transition-all cursor-pointer">
-                        <option value="">-- Choisir une activité principale --</option>
-                    </select>
+                    <div id="main-badges-container" class="flex flex-wrap gap-2">
+                        </div>
                 </div>
 
-                <!-- Sélecteur d'activité source dépendant -->
                 <div>
-                    <label for="source-activity" class="block text-xs font-semibold text-slate-700 mb-1.5">
-                        2. Sélectionner l'Activité Source associée :
+                    <label class="block text-xs font-semibold text-slate-700 mb-2">
+                        2. Filtrer par Activité(s) Source(s) associée(s) :
                     </label>
-                    <select id="source-activity" disabled class="block w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2.5 text-sm shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
-                        <option value="">-- Sélectionnez d'abord l'activité générale --</option>
-                    </select>
+                    <div id="source-badges-container" class="flex flex-wrap gap-2">
+                        <span class="text-xs text-slate-400 italic">Sélectionnez au moins une activité générale pour voir ses sources.</span>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Écran d'attente initial -->
         <div id="empty-state" class="text-center py-16 bg-white rounded-xl border border-slate-200 shadow-sm no-print">
             <div class="text-4xl mb-3">📊</div>
-            <h3 class="text-sm font-semibold text-slate-900">Aucune sélection active</h3>
-            <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">Veuillez définir une activité générale et sa source pour dresser automatiquement la matrice des 5 colonnes.</p>
+            <h3 class="text-sm font-semibold text-slate-900">Aucun filtre sélectionné</h3>
+            <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">Cliquez sur une ou plusieurs activités ci-dessus pour générer dynamiquement votre tableau de prévention des risques.</p>
         </div>
 
-        <!-- Conteneur de Restitution de la Matrice Réactive -->
         <div id="results-section" class="hidden bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden print-full-width">
             
-            <!-- Entête du rapport d'analyse -->
             <div class="p-4 bg-slate-50 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 no-print">
                 <div>
-                    <div class="text-xs font-bold text-emerald-600 uppercase tracking-wider">Analyse de conformité</div>
-                    <h3 id="report-title" class="text-base font-bold text-slate-900 mt-0.5">Matrice de Prévention</h3>
+                    <div class="text-xs font-bold text-emerald-600 uppercase tracking-wider">Matrice dynamique personnalisée</div>
+                    <h3 id="report-title" class="text-base font-bold text-slate-900 mt-0.5">Éléments de Sécurité Sélectionnés</h3>
                 </div>
                 <button onclick="window.print()" class="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500 cursor-pointer transition-all">
-                    🖨️ Exporter en PDF / Imprimer
+                    🖨️ Exporter la sélection en PDF
                 </button>
             </div>
 
-            <!-- Rendu du Tableau Règlementaire sur 5 Colonnes -->
             <div class="overflow-x-auto print-full-width">
                 <table class="w-full text-left border-collapse min-w-[900px] print-full-width">
                     <thead>
@@ -106,2902 +100,268 @@
                         </tr>
                     </thead>
                     <tbody id="table-body" class="divide-y divide-slate-200 text-xs sm:text-sm text-slate-700">
-                        <!-- Lignes de données injectées de manière réactive par l'algorithme JS -->
-                    </tbody>
+                        </tbody>
                 </table>
             </div>
         </div>
 
     </main>
 
-    <!-- Pied de page -->
     <footer class="bg-white border-t border-slate-200 py-3 mt-auto no-print">
         <div class="max-w-7xl mx-auto px-4 text-center text-[11px] text-slate-500 sm:px-6 lg:px-8">
-            Matrice de Prévention PSS Connectée &bull; Génération autonome conforme GitHub Pages.
+            Matrice Multi-Filtres &bull; Généré dynamiquement pour votre espace GitHub.
         </div>
     </footer>
 
-    <!-- Logique Algorithmique et Structure Relationnelle des données -->
     <script>
+        // Utilisation automatique de la base de données extraite de votre fichier PSS.txt
         const database = {
-    "gros_uvre": {
-        "label": "Gros Œuvre",
-        "sources": {
-            "installation_de_chantier": {
-                "label": "Installation de chantier",
-                "items": [
-                    {
-                        "risque": "Chute de plain-pied",
-                        "mesures": "Maintenir les accès dégagés, assurer le nettoyage régulier et mettre en place un balisage adapté.",
-                        "controles": "Contrôle quotidien des circulations, vérification du rangement et de l’éclairage."
-                    },
-                    {
-                        "risque": "Circulation engins/piétons",
-                        "mesures": "Mettre en place un plan de circulation séparant les zones piétons et engins.",
-                        "controles": "Vérification du balisage, contrôle des voies de circulation et respect des consignes."
-                    }
-                ]
+            "gros_oeuvre": {
+                label: "Gros Œuvre",
+                sources: {
+                    "inst_chantier": { label: "Installation de chantier", items: [{ risque: "Chute de plain-pied", mesures: "Maintenir les accès dégagés, assurer le nettoyage régulier et mettre en place un balisage adapté.", controles: "Contrôle quotidien des circulations, vérification du rangement et de l’éclairage." }, { risque: "Circulation engins/piétons", mesures: "Mettre en place un plan de circulation séparant les zones piétons et engins.", controles: "Vérification du balisage, contrôle des voies de circulation et respect des consignes." }] },
+                    "terrassement": { label: "Terrassement", items: [{ risque: "Effondrement de fouille", mesures: "Prévoir blindage ou talutage des fouilles selon la profondeur et la nature du terrain.", controles: "Contrôle quotidien des parois et inspection après intempéries." }, { risque: "Réseaux enterrés", mesures: "Réaliser les DICT et localiser les réseaux avant terrassement.", controles: "Vérification des plans réseaux et contrôle du marquage au sol." }, { risque: "Renversement engin", mesures: "Utiliser des engins adaptés au terrain et respecter les charges admissibles.", controles: "Contrôle de stabilité des sols et vérification autorisations conducteurs." }] },
+                    "fouilles": { label: "Fouilles", items: [{ risque: "Chute dans excavation", mesures: "Installer garde-corps et accès sécurisés autour des fouilles.", controles: "Contrôle des protections collectives et accès sécurisés." }] },
+                    "coffrage": { label: "Coffrage", items: [{ risque: "Chute de hauteur", mesures: "Installer garde-corps, lignes de vie et équipements antichute.", controles: "Vérification quotidienne des protections et du port du harnais." }, { risque: "Effondrement coffrage", mesures: "Vérifier la stabilité des coffrages avant bétonnage.", controles: "Inspection technique des coffrages avant mise en charge." }] },
+                    "ferraillage": { label: "Ferraillage", items: [{ risque: "Coupures", mesures: "Utiliser des protections adaptées et ranger correctement les matériaux coupants.", controles: "Contrôle du port des gants et du rangement chantier." }, { risque: "TMS", mesures: "Limiter les manutentions manuelles et utiliser des aides mécaniques.", controles: "Contrôle des postes de travail et des manutentions répétitives." }] },
+                    "betonnage": { label: "Bétonnage", items: [{ risque: "Projection béton", mesures: "Porter les protections adaptées lors du bétonnage.", controles: "Vérification du port des cookies, gants et protections faciales." }, { risque: "Rupture flexible pompe", mesures: "Contrôler les flexibles avant utilisation et sécuriser la zone de pompage.", controles: "Inspection des flexibles et contrôle de la zone interdite." }] },
+                    "maconnerie": { label: "Maçonnerie", items: [{ risque: "Chute de matériaux", mesures: "Installer filets, plinthes et organiser le stockage sécurisé des matériaux.", controles: "Vérification des zones de stockage et protections périphériques." }, { risque: "Utilisation disqueuse", mesures: "Utiliser des disqueuses équipées de carters de protection conformes.", controles: "Contrôle de l’état des disques et des protections." }] },
+                    "dallage": { label: "Dallage", items: [{ risque: "Contact ciment", mesures: "Éviter le contact direct avec le ciment et prévoir des moyens de lavage.", controles: "Vérification du port des gants et présence d’eau de rinçage." }] },
+                    "echafaudage": { label: "Échafaudage", items: [{ risque: "Effondrement", mesures: "Stabiliser les structures provisoires et contrôler les appuis.", controles: "Inspection quotidienne des structures et supports." }, { risque: "Chute d’objet", mesures: "Sécuriser les travaux en hauteur et baliser les zones inférieures.", controles: "Contrôle des filets, plinthes et zones interdites." }] },
+                    "levage": { label: "Levage", items: [{ risque: "Chute de charge", mesures: "Vérifier les accessoires de levage et interdire l’accès sous charge.", controles: "Contrôle des élingues et vérification des zones de sécurité." }, { risque: "Heurt par charge", mesures: "Organiser les manœuvres de levage avec chef de manœuvre.", controles: "Contrôle du balisage et des procédures de levage." }] },
+                    "intemperies": { label: "Intempéries", items: [{ risque: "Vent fort", mesures: "Arrêter les travaux en hauteur et levages en cas de vent fort.", controles: "Contrôle météo quotidien et application des consignes." }, { risque: "Forte chaleur", mesures: "Prévoir hydratation, pauses et zones ombragées.", controles: "Contrôle disponibilité eau potable et pauses." }] }
+                }
             },
-            "terrassement": {
-                "label": "Terrassement",
-                "items": [
-                    {
-                        "risque": "Effondrement de fouille",
-                        "mesures": "Prévoir blindage ou talutage des fouilles selon la profondeur et la nature du terrain.",
-                        "controles": "Contrôle quotidien des parois et inspection après intempéries."
-                    },
-                    {
-                        "risque": "Réseaux enterrés",
-                        "mesures": "Réaliser les DICT et localiser les réseaux avant terrassement.",
-                        "controles": "Vérification des plans réseaux et contrôle du marquage au sol."
-                    },
-                    {
-                        "risque": "Renversement engin",
-                        "mesures": "Utiliser des engins adaptés au terrain et respecter les charges admissibles.",
-                        "controles": "Contrôle de stabilité des sols et vérification autorisations conducteurs."
-                    }
-                ]
+            "hauteur_chute": {
+                label: "Hauteur de chute",
+                sources: {
+                    "bord_dalle": { label: "Travail en bord de dalle", items: [{ risque: "Chute de hauteur", mesures: "Installer des garde-corps, lignes de vie et protections collectives adaptées.", controles: "Vérification quotidienne des protections collectives et du port du harnais." }] },
+                    "toiture": { label: "Travail sur toiture", items: [{ risque: "Chute depuis toiture", mesures: "Sécuriser les travaux en toiture avec lignes de vie et accès contrôlés.", controles: "Contrôle des ancrages, accès toiture et conditions météo." }] },
+                    "tremies": { label: "Trémies et ouvertures", items: [{ risque: "Chute dans vide", mesures: "Installer des garde-corps périphériques et baliser les ouvertures.", controles: "Vérification des protections périphériques et du balisage." }] },
+                    "nacelle": { label: "Travail nacelle", items: [{ risque: "Chute depuis nacelle", mesures: "Utiliser des nacelles conformes avec port obligatoire du harnais.", controles: "Contrôle des vérifications périodiques et du port du harnais." }] },
+                    "predalles": { label: "Pose prédalles", items: [{ risque: "Chute dans vide", mesures: "Mettre en place des filets de sécurité et protections périphériques.", controles: "Vérification quotidienne des filets et garde-corps." }] }
+                }
             },
-            "fouilles": {
-                "label": "Fouilles",
-                "items": [
-                    {
-                        "risque": "Chute dans excavation",
-                        "mesures": "Installer garde-corps et accès sécurisés autour des fouilles.",
-                        "controles": "Contrôle des protections collectives et accès sécurisés."
-                    }
-                ]
+            "terassement": {
+                label: "Terrassement",
+                sources: {
+                    "excav_prof": { label: "Excavation profonde > 1,20 m", items: [{ risque: "Effondrement des parois", mesures: "Mise en place d'un blindage ou un talutage adapté selon la profondeur et la nature du terrain.", controles: "Contrôle quotidien des parois et inspection après intempéries." }] },
+                    "prox_reseaux": { label: "Travaux à proximité réseaux", items: [{ risque: "Contact réseau enterré", mesures: "Réaliser les DICT et localiser précisément les réseaux avant excavation.", controles: "Contrôle des plans réseaux et marquage au sol." }] },
+                    "atmo_conf": { label: "Atmosphère confinée", items: [{ risque: "Manque oxygène / gaz", mesures: "Contrôler l’atmosphère des fouilles profondes et ventiler si nécessaire.", controles: "Vérification des détecteurs gaz et contrôle ventilation." }] }
+                }
             },
-            "coffrage": {
-                "label": "Coffrage",
-                "items": [
-                    {
-                        "risque": "Chute de hauteur",
-                        "mesures": "Installer garde-corps, lignes de vie et équipements antichute.",
-                        "controles": "Vérification quotidienne des protections et du port du harnais."
-                    },
-                    {
-                        "risque": "Effondrement coffrage",
-                        "mesures": "Vérifier la stabilité des coffrages avant bétonnage.",
-                        "controles": "Inspection technique des coffrages avant mise en charge."
-                    }
-                ]
+            "chute_outillage": {
+                label: "Chute d'outillage & objet",
+                sources: {
+                    "trav_haut": { label: "Travail en hauteur", items: [{ risque: "Chute d’outils", mesures: "Attacher les outils utilisés en hauteur et sécuriser les zones de travail.", controles: "Vérification des attaches-outils et du balisage des zones." }] },
+                    "lev_mat": { label: "Levage de matériel", items: [{ risque: "Chute de charge", mesures: "Contrôler les accessoires de levage et interdire l’accès sous les charges.", controles: "Vérification des élingues et des zones interdites." }] }
+                }
             },
-            "ferraillage": {
-                "label": "Ferraillage",
-                "items": [
-                    {
-                        "risque": "Coupures",
-                        "mesures": "Utiliser des protections adaptées et ranger correctement les matériaux coupants.",
-                        "controles": "Contrôle du port des gants et du rangement chantier."
-                    },
-                    {
-                        "risque": "TMS",
-                        "mesures": "Limiter les manutentions manuelles et utiliser des aides mécaniques.",
-                        "controles": "Contrôle des postes de travail et des manutentions répétitives."
-                    }
-                ]
+            "engin_materiel": {
+                label: "Engin, matériel & produit",
+                sources: {
+                    "conduite": { label: "Conduite d’engins de chantier", items: [{ risque: "Collision engin/piéton", mesures: "Mettre en place un plan de circulation séparant les zones piétons et engins.", controles: "Contrôle du balisage, des voies de circulation et du respect des consignes." }] },
+                    "manoeuvre": { label: "Manœuvre engins", items: [{ risque: "Angle mort", mesures: "Prévoir une aide-manœuvre et des alarmes de recul sur les engins.", controles: "Vérification des alarmes, caméras et présence d’un signaleur." }] },
+                    "chimiques": { label: "Produits chimiques chantier", items: [{ risque: "Contact produit dangereux", mesures: "Mettre à disposition les FDS et utiliser des EPI adaptés.", controles: "Contrôle présence FDS et port des protections individuelles." }] }
+                }
             },
-            "b_tonnage": {
-                "label": "Bétonnage",
-                "items": [
-                    {
-                        "risque": "Projection béton",
-                        "mesures": "Porter les protections adaptées lors du bétonnage.",
-                        "controles": "Vérification du port des lunettes, gants et protections faciales."
-                    },
-                    {
-                        "risque": "Rupture flexible pompe",
-                        "mesures": "Contrôler les flexibles avant utilisation et sécuriser la zone de pompage.",
-                        "controles": "Inspection des flexibles et contrôle de la zone interdite."
-                    }
-                ]
+            "techniques_elec": {
+                label: "Techniques électriques",
+                sources: {
+                    "sous_tension": { label: "Travaux sur installation sous tension", items: [{ risque: "Contact électrique direct", mesures: "Mettre hors tension les installations avant toute intervention et appliquer une procédure de consignation.", controles: "Vérification d’absence de tension et contrôle des consignations." }] },
+                    "coffret": { label: "Utilisation coffret chantier", items: [{ risque: "Contact indirect", mesures: "Installer des protections différentielles et assurer la mise à la terre des équipements.", controles: "Contrôle des dispositifs différentiels et vérification de la terre." }] }
+                }
             },
-            "ma_onnerie": {
-                "label": "Maçonnerie",
-                "items": [
-                    {
-                        "risque": "Chute de matériaux",
-                        "mesures": "Installer filets, plinthes et organiser le stockage sécurisé des matériaux.",
-                        "controles": "Vérification des zones de stockage et protections périphériques."
-                    },
-                    {
-                        "risque": "Utilisation disqueuse",
-                        "mesures": "Utiliser des disqueuses équipées de carters de protection conformes.",
-                        "controles": "Contrôle de l’état des disques et des protections."
-                    }
-                ]
+            "proximite_voirie": {
+                label: "Proximité voirie",
+                sources: {
+                    "bord_route": { label: "Chantier en bord de route", items: [{ risque: "Collision avec véhicule", mesures: "Mettre en place un balisage et une signalisation réglementaire autour du chantier.", controles: "Contrôle quotidien du balisage et de la signalisation temporaire." }] },
+                    "charg_voirie": { label: "Chargement/déchargement voirie", items: [{ risque: "Heurt par véhicule", mesures: "Délimiter les zones de travail et renforcer la visibilité du personnel.", controles: "Contrôle du port des gilets haute visibilité et du balisage." }] }
+                }
             },
-            "dallage": {
-                "label": "Dallage",
-                "items": [
-                    {
-                        "risque": "Contact ciment",
-                        "mesures": "Éviter le contact direct avec le ciment et prévoir des moyens de lavage.",
-                        "controles": "Vérification du port des gants et présence d’eau de rinçage."
-                    }
-                ]
+            "organisation_chantier": {
+                label: "Organisation chantier",
+                sources: {
+                    "mauvaise_org": { label: "Mauvaise organisation générale", items: [{ risque: "Désordre chantier", mesures: "Maintenir le chantier propre et organiser les zones de stockage.", controles: "Contrôle quotidien du rangement et des accès chantier." }] },
+                    "coactivite_org": { label: "Coactivité entreprises", items: [{ risque: "Interférence travaux", mesures: "Planifier les interventions et coordonner les entreprises présentes.", controles: "Réunions de coordination SPS et suivi planning." }] }
+                }
             },
-            "travail_en_hauteur": {
-                "label": "Travail en hauteur",
-                "items": [
-                    {
-                        "risque": "Chute de hauteur",
-                        "mesures": "Mettre en place des protections collectives et individuelles adaptées.",
-                        "controles": "Contrôle des échafaudages, garde-corps et harnais."
-                    }
-                ]
+            "infrastructures": {
+                label: "Infrastructures et Réseaux",
+                sources: {
+                    "assainissement": { label: "Pose de canalisations / Assainissement", items: [{ risque: "Éboulement de tranchée", mesures: "Mettre en place un blindage de tranchée systématique au-delà de 1.30m ou taluter.", controles: "Vérification visuelle des parois et du blindage avant la descente des compagnons." }] },
+                    "fonçage": { label: "Forage et Fonçage horizontal", items: [{ risque: "Heurt de réseaux existants non répertoriés", mesures: "Procédure d'excavation douce (aspiratrice ou manuelle) aux abords des fuseaux.", controles: "Présence permanente du plan de synthèse des réseaux validé sur site." }] }
+                }
             },
-            "chafaudage": {
-                "label": "Échafaudage",
-                "items": [
-                    {
-                        "risque": "Effondrement",
-                        "mesures": "Stabiliser les structures provisoires et contrôler les appuis.",
-                        "controles": "Inspection quotidienne des structures et supports."
-                    },
-                    {
-                        "risque": "Chute d’objet",
-                        "mesures": "Sécuriser les travaux en hauteur et baliser les zones inférieures.",
-                        "controles": "Contrôle des filets, plinthes et zones interdites."
-                    }
-                ]
+            "second_oeuvre": {
+                label: "Second Œuvre & Finitions",
+                sources: {
+                    "cloisonnement": { label: "Pose de cloisons et plaques de plâtre", items: [{ risque: "Blessures / TMS par manutention de plaques", mesures: "Utiliser des lève-plaques mécaniques et des chariots de transport adaptés.", controles: "Vérification de la mise à disposition des équipements d'aide à la manutention." }] },
+                    "menuiserie": { label: "Pose de menuiseries extérieures", items: [{ risque: "Chute dans le vide (baies non vitrées)", mesures: "Conserver les garde-corps provisoires jusqu'au moment de la pose définitive de la menuiserie.", controles: "Inspection des fixations de sécurité avant le retrait des protections collectives." }] }
+                }
             },
-            "levage": {
-                "label": "Levage",
-                "items": [
-                    {
-                        "risque": "Chute de charge",
-                        "mesures": "Vérifier les accessoires de levage et interdire l’accès sous charge.",
-                        "controles": "Contrôle des élingues et vérification des zones de sécurité."
-                    },
-                    {
-                        "risque": "Heurt par charge",
-                        "mesures": "Organiser les manœuvres de levage avec chef de manœuvre.",
-                        "controles": "Contrôle du balisage et des procédures de levage."
-                    }
-                ]
-            },
-            "engins_chantier": {
-                "label": "Engins chantier",
-                "items": [
-                    {
-                        "risque": "Angle mort",
-                        "mesures": "Prévoir une aide à la manœuvre et alarmes de recul.",
-                        "controles": "Vérification des alarmes et présence d’un signaleur."
-                    },
-                    {
-                        "risque": "Collision",
-                        "mesures": "Définir des voies de circulation claires et sécurisées.",
-                        "controles": "Contrôle circulation chantier et signalisation."
-                    }
-                ]
-            },
-            "lectricit": {
-                "label": "Électricité",
-                "items": [
-                    {
-                        "risque": "Contact direct",
-                        "mesures": "Consigner les installations électriques avant intervention.",
-                        "controles": "Vérification absence tension et consignation."
-                    },
-                    {
-                        "risque": "Câble endommagé",
-                        "mesures": "Contrôler régulièrement l’état des câbles électriques.",
-                        "controles": "Inspection visuelle quotidienne des câbles et prises."
-                    }
-                ]
-            },
-            "d_coupe_b_ton": {
-                "label": "Découpe béton",
-                "items": [
-                    {
-                        "risque": "Poussières silice",
-                        "mesures": "Limiter l’émission de poussières par aspiration ou arrosage.",
-                        "controles": "Contrôle de l’arrosage et du port des masques adaptés."
-                    }
-                ]
-            },
-            "marteau_piqueur": {
-                "label": "Marteau-piqueur",
-                "items": [
-                    {
-                        "risque": "Bruit",
-                        "mesures": "Réduire l’exposition au bruit et fournir des protections auditives.",
-                        "controles": "Contrôle du port des protections auditives."
-                    },
-                    {
-                        "risque": "Vibrations",
-                        "mesures": "Limiter le temps d’utilisation des outils vibrants.",
-                        "controles": "Vérification durée d’exposition et rotation du personnel."
-                    }
-                ]
-            },
-            "soudage": {
-                "label": "Soudage",
-                "items": [
-                    {
-                        "risque": "Incendie",
-                        "mesures": "Mettre en place des extincteurs et permis feu pour travaux à chaud.",
-                        "controles": "Vérification extincteurs et contrôle permis feu."
-                    },
-                    {
-                        "risque": "Rayonnement",
-                        "mesures": "Utiliser des écrans de protection pour les travaux de soudage.",
-                        "controles": "Contrôle des écrans et EPI spécifiques."
-                    }
-                ]
-            },
-            "circulation_interne": {
-                "label": "Circulation interne",
-                "items": [
-                    {
-                        "risque": "Heurt piéton",
-                        "mesures": "Séparer physiquement les zones piétons et engins.",
-                        "controles": "Contrôle du balisage et circulation interne."
-                    }
-                ]
-            },
-            "stockage_mat_riaux": {
-                "label": "Stockage matériaux",
-                "items": [
-                    {
-                        "risque": "Chute matériaux",
-                        "mesures": "Organiser un stockage stable et sécurisé des matériaux.",
-                        "controles": "Vérification stabilité des stockages."
-                    }
-                ]
-            },
-            "intemp_ries": {
-                "label": "Intempéries",
-                "items": [
-                    {
-                        "risque": "Vent fort",
-                        "mesures": "Arrêter les travaux en hauteur et levages en cas de vent fort.",
-                        "controles": "Contrôle météo quotidien et application des consignes."
-                    },
-                    {
-                        "risque": "Forte chaleur",
-                        "mesures": "Prévoir hydratation, pauses et zones ombragées.",
-                        "controles": "Contrôle disponibilité eau potable et pauses."
-                    }
-                ]
-            },
-            "coactivit": {
-                "label": "Coactivité",
-                "items": [
-                    {
-                        "risque": "Interférence entreprises",
-                        "mesures": "Organiser la coordination SPS et le planning des interventions.",
-                        "controles": "Réunions de coordination et contrôle coactivité."
-                    }
-                ]
-            },
-            "nettoyage_chantier": {
-                "label": "Nettoyage chantier",
-                "items": [
-                    {
-                        "risque": "Coupure / chute",
-                        "mesures": "Maintenir le chantier propre et évacuer régulièrement les déchets.",
-                        "controles": "Contrôle rangement chantier et évacuation gravats."
-                    }
-                ]
-            },
-            "secours": {
-                "label": "Secours",
-                "items": [
-                    {
-                        "risque": "Retard intervention",
-                        "mesures": "Prévoir des moyens de secours accessibles et du personnel SST.",
-                        "controles": "Vérification accès secours et présence SST."
-                    }
-                ]
+            "impetrants": {
+                label: "Impétrants",
+                sources: {
+                    "trav_manuel": { label: "Travail manuel en fouille", items: [{ risque: "Contact accidentel réseau", mesures: "Baliser les zones sensibles et limiter les accès.", controles: "Contrôle signalisation et zones interdites." }] },
+                    "cond_meteo": { label: "Conditions météo défavorables", items: [{ risque: "Mauvaise visibilité réseaux", mesures: "Marquer clairement les réseaux au sol avant travaux.", controles: "Vérification du marquage et plans disponibles." }] },
+                    "coactivite_concess": { label: "Coactivité avec concessionnaires", items: [{ risque: "Mauvaise coordination", mesures: "Organiser une réunion préalable avec les intervenants.", controles: "Contrôle coordination et diffusion consignes." }] },
+                    "signalisation_insuf": { label: "Signalisation réseau insuffisante", items: [{ risque: "Erreur excavation", mesures: "Utiliser les plans actualisés et méthodes adaptées.", controles: "Vérification procédures terrassement." }] },
+                    "egouttage": { label: "Travaux à proximité égouttage", items: [{ risque: "Atmosphère dangereuse", mesures: "Contrôler l’atmosphère avant intervention en fouille.", controles: "Vérification détecteurs gaz et ventilation." }] },
+                    "marteau_piqueur": { label: "Utilisation marteau-piqueur", items: [{ risque: "Rupture conduite", mesures: "Prévoir un arrêt immédiat des travaux en cas d’incident.", controles: "Contrôle application procédure urgence." }] },
+                    "travaux_voirie": { label: "Travaux voirie", items: [{ risque: "Circulation proche impétrants", mesures: "Délimiter les zones d’évolution des engins.", controles: "Contrôle circulation et balisage chantier." }] },
+                    "urgence_reseau": { label: "Intervention urgence réseau", items: [{ risque: "Stress / précipitation", mesures: "Planifier les travaux et limiter les interventions en urgence.", controles: "Contrôle organisation chantier et briefing sécurité." }] },
+                    "reseau_inconnu": { label: "Réseau inconnu découvert", items: [{ risque: "Réaction inadaptée", mesures: "Former les équipes aux procédures d’urgence et d’évacuation.", controles: "Vérification exercices sécurité et consignes affichées." }] }
+                }
             }
-        }
-    },
-    "hauteur_de_chute": {
-        "label": "Hauteur de chute",
-        "sources": {
-            "travail_en_bord_de_dalle": {
-                "label": "Travail en bord de dalle",
-                "items": [
-                    {
-                        "risque": "Chute de hauteur",
-                        "mesures": "Installer des garde-corps, lignes de vie et protections collectives adaptées.",
-                        "controles": "Vérification quotidienne des protections collectives et du port du harnais."
-                    }
-                ]
-            },
-            "travail_sur_toiture": {
-                "label": "Travail sur toiture",
-                "items": [
-                    {
-                        "risque": "Chute depuis toiture",
-                        "mesures": "Sécuriser les travaux en toiture avec lignes de vie et accès contrôlés.",
-                        "controles": "Contrôle des ancrages, accès toiture et conditions météo."
-                    }
-                ]
-            },
-            "travail_sur_chafaudage": {
-                "label": "Travail sur échafaudage",
-                "items": [
-                    {
-                        "risque": "Chute de personne",
-                        "mesures": "Mettre en place des protections antichute et limiter l’accès aux zones dangereuses.",
-                        "controles": "Inspection des zones de travail et contrôle des EPI antichute."
-                    }
-                ]
-            },
-            "montage_chafaudage": {
-                "label": "Montage échafaudage",
-                "items": [
-                    {
-                        "risque": "Chute pendant montage",
-                        "mesures": "Confier les travaux de montage à du personnel formé et habilité.",
-                        "controles": "Vérification des habilitations et contrôle du montage."
-                    }
-                ]
-            },
-            "utilisation_chelle": {
-                "label": "Utilisation échelle",
-                "items": [
-                    {
-                        "risque": "Basculement / glissade",
-                        "mesures": "Maintenir les surfaces propres, stables et antidérapantes.",
-                        "controles": "Contrôle de l’état des surfaces et nettoyage régulier."
-                    }
-                ]
-            },
-            "tr_mies_et_ouvertures": {
-                "label": "Trémies et ouvertures",
-                "items": [
-                    {
-                        "risque": "Chute dans vide",
-                        "mesures": "Installer des garde-corps périphériques et baliser les ouvertures.",
-                        "controles": "Vérification des protections périphériques et du balisage."
-                    }
-                ]
-            },
-            "travail_nacelle": {
-                "label": "Travail nacelle",
-                "items": [
-                    {
-                        "risque": "Chute depuis nacelle",
-                        "mesures": "Utiliser des nacelles conformes avec port obligatoire du harnais.",
-                        "controles": "Contrôle des vérifications périodiques et du port du harnais."
-                    }
-                ]
-            },
-            "escaliers_provisoires": {
-                "label": "Escaliers provisoires",
-                "items": [
-                    {
-                        "risque": "Chute dans escalier",
-                        "mesures": "Sécuriser les escaliers par mains courantes et éclairage suffisant.",
-                        "controles": "Vérification de la stabilité des escaliers et de l’éclairage."
-                    }
-                ]
-            },
-            "plateformes_de_travail": {
-                "label": "Plateformes de travail",
-                "items": [
-                    {
-                        "risque": "Perte d’équilibre",
-                        "mesures": "Prévoir des plateformes de travail stables et sécurisées.",
-                        "controles": "Contrôle des plateformes et accès de travail."
-                    }
-                ]
-            },
-            "coffrage_vertical": {
-                "label": "Coffrage vertical",
-                "items": [
-                    {
-                        "risque": "Chute pendant coffrage",
-                        "mesures": "Installer des protections collectives lors des travaux de coffrage.",
-                        "controles": "Vérification des passerelles, garde-corps et stabilité coffrage."
-                    }
-                ]
-            },
-            "ferraillage_en_hauteur": {
-                "label": "Ferraillage en hauteur",
-                "items": [
-                    {
-                        "risque": "Déséquilibre",
-                        "mesures": "Prévoir des équipements adaptés et limiter les postures dangereuses.",
-                        "controles": "Contrôle des équipements et des méthodes de travail."
-                    }
-                ]
-            },
-            "pose_pr_dalles": {
-                "label": "Pose prédalles",
-                "items": [
-                    {
-                        "risque": "Chute dans vide",
-                        "mesures": "Mettre en place des filets de sécurité et protections périphériques.",
-                        "controles": "Vérification quotidienne des filets et garde-corps."
-                    }
-                ]
-            },
-            "levage_en_hauteur": {
-                "label": "Levage en hauteur",
-                "items": [
-                    {
-                        "risque": "Heurt / déséquilibre",
-                        "mesures": "Organiser les zones de circulation et éviter les obstacles.",
-                        "controles": "Contrôle des accès et de la circulation chantier."
-                    }
-                ]
-            },
-            "travail_pr_s_de_tranch_e": {
-                "label": "Travail près de tranchée",
-                "items": [
-                    {
-                        "risque": "Chute dans fouille",
-                        "mesures": "Installer des protections autour des fouilles et accès sécurisés.",
-                        "controles": "Contrôle des garde-corps et signalisation des fouilles."
-                    }
-                ]
-            },
-            "acc_s_toiture": {
-                "label": "Accès toiture",
-                "items": [
-                    {
-                        "risque": "Mauvais accès",
-                        "mesures": "Prévoir des accès sécurisés et conformes aux zones de travail.",
-                        "controles": "Vérification des échelles, passerelles et accès chantier."
-                    }
-                ]
-            },
-            "conditions_m_t_o": {
-                "label": "Conditions météo",
-                "items": [
-                    {
-                        "risque": "Vent / pluie",
-                        "mesures": "Suspendre les travaux en hauteur en cas d’intempéries.",
-                        "controles": "Contrôle météo quotidien et application des consignes d’arrêt."
-                    }
-                ]
-            },
-            "travail_sur_passerelle": {
-                "label": "Travail sur passerelle",
-                "items": [
-                    {
-                        "risque": "Rupture ou glissade",
-                        "mesures": "Vérifier l’état des supports, planchers et équipements d’accès.",
-                        "controles": "Inspection des équipements avant utilisation."
-                    }
-                ]
-            },
-            "travail_sur_charpente": {
-                "label": "Travail sur charpente",
-                "items": [
-                    {
-                        "risque": "Perte d’appui",
-                        "mesures": "Maintenir des surfaces de travail stables et dégagées.",
-                        "controles": "Contrôle de la stabilité et du rangement des zones de travail."
-                    }
-                ]
-            },
-            "d_placement_en_hauteur": {
-                "label": "Déplacement en hauteur",
-                "items": [
-                    {
-                        "risque": "Faux mouvement",
-                        "mesures": "Former le personnel aux gestes sécurisés et au travail en hauteur.",
-                        "controles": "Contrôle des formations et observation terrain."
-                    }
-                ]
-            },
-            "d_pose_protections_collectives": {
-                "label": "Dépose protections collectives",
-                "items": [
-                    {
-                        "risque": "Exposition au vide",
-                        "mesures": "Installer des protections collectives avant toute intervention.",
-                        "controles": "Vérification des protections avant démarrage des travaux."
-                    }
-                ]
-            }
-        }
-    },
-    "terrassement": {
-        "label": "Terrassement",
-        "sources": {
-            "excavation_profonde_1_20_m": {
-                "label": "Excavation profonde > 1,20 m",
-                "items": [
-                    {
-                        "risque": "Effondrement des parois",
-                        "mesures": "Mettre en place un blindage ou un talutage adapté selon la profondeur et la nature du terrain.",
-                        "controles": "Contrôle quotidien des parois et inspection après intempéries."
-                    }
-                ]
-            },
-            "travail_en_fond_de_fouille": {
-                "label": "Travail en fond de fouille",
-                "items": [
-                    {
-                        "risque": "Chute de matériaux",
-                        "mesures": "Stocker les déblais à distance suffisante des bords de fouille.",
-                        "controles": "Vérification des zones de stockage et stabilité des déblais."
-                    }
-                ]
-            },
-            "acc_s_la_fouille": {
-                "label": "Accès à la fouille",
-                "items": [
-                    {
-                        "risque": "Chute dans excavation",
-                        "mesures": "Installer des garde-corps, barrières et accès sécurisés autour des fouilles.",
-                        "controles": "Contrôle des protections périphériques et des accès."
-                    }
-                ]
-            },
-            "circulation_engins_pr_s_des_bords": {
-                "label": "Circulation engins près des bords",
-                "items": [
-                    {
-                        "risque": "Éboulement",
-                        "mesures": "Réaliser une étude préalable du terrain et sécuriser les fouilles.",
-                        "controles": "Vérification stabilité terrain et contrôle du blindage."
-                    }
-                ]
-            },
-            "travaux_proximit_r_seaux": {
-                "label": "Travaux à proximité réseaux",
-                "items": [
-                    {
-                        "risque": "Contact réseau enterré",
-                        "mesures": "Réaliser les DICT et localiser précisément les réseaux avant excavation.",
-                        "controles": "Contrôle des plans réseaux et marquage au sol."
-                    }
-                ]
-            },
-            "pr_sence_d_eau_dans_fouille": {
-                "label": "Présence d’eau dans fouille",
-                "items": [
-                    {
-                        "risque": "Noyade, glissade",
-                        "mesures": "Prévoir un pompage efficace et maintenir les accès stabilisés.",
-                        "controles": "Contrôle drainage, pompage et état des accès."
-                    }
-                ]
-            },
-            "atmosph_re_confin_e": {
-                "label": "Atmosphère confinée",
-                "items": [
-                    {
-                        "risque": "Manque oxygène / gaz",
-                        "mesures": "Contrôler l’atmosphère des fouilles profondes et ventiler si nécessaire.",
-                        "controles": "Vérification des détecteurs gaz et contrôle ventilation."
-                    }
-                ]
-            },
-            "entr_e_sortie_fouille": {
-                "label": "Entrée/sortie fouille",
-                "items": [
-                    {
-                        "risque": "Glissade",
-                        "mesures": "Maintenir les accès propres et sécurisés par des revêtements adaptés.",
-                        "controles": "Contrôle du nettoyage et de l’état des cheminements."
-                    }
-                ]
-            },
-            "terrassement_m_canique": {
-                "label": "Terrassement mécanique",
-                "items": [
-                    {
-                        "risque": "Collision engin/piéton",
-                        "mesures": "Séparer les zones de circulation piétons et engins par balisage.",
-                        "controles": "Contrôle du plan de circulation et signalisation."
-                    }
-                ]
-            },
-            "rotation_pelle_m_canique": {
-                "label": "Rotation pelle mécanique",
-                "items": [
-                    {
-                        "risque": "Heurt",
-                        "mesures": "Délimiter les zones de travail des engins et utiliser un aide-manœuvre.",
-                        "controles": "Vérification du balisage et présence signaleur."
-                    }
-                ]
-            },
-            "chargement_d_blais": {
-                "label": "Chargement déblais",
-                "items": [
-                    {
-                        "risque": "Chute de charge",
-                        "mesures": "Contrôler les accessoires de levage et interdire l’accès sous charge.",
-                        "controles": "Inspection des élingues et respect des zones interdites."
-                    }
-                ]
-            },
-            "travail_proche_bord_fouille": {
-                "label": "Travail proche bord fouille",
-                "items": [
-                    {
-                        "risque": "Chute dans vide",
-                        "mesures": "Installer des protections collectives autour des excavations.",
-                        "controles": "Contrôle des garde-corps et balisage périphérique."
-                    }
-                ]
-            },
-            "vibrations_proximit": {
-                "label": "Vibrations à proximité",
-                "items": [
-                    {
-                        "risque": "Déstabilisation terrain",
-                        "mesures": "Adapter les méthodes de terrassement à la nature du sol.",
-                        "controles": "Contrôle géotechnique et inspection quotidienne."
-                    }
-                ]
-            },
-            "intemp_ries": {
-                "label": "Intempéries",
-                "items": [
-                    {
-                        "risque": "Affaissement terrain",
-                        "mesures": "Limiter les charges à proximité des fouilles et stabiliser le terrain.",
-                        "controles": "Vérification des distances de sécurité et stabilité des abords."
-                    }
-                ]
-            },
-            "sol_instable": {
-                "label": "Sol instable",
-                "items": [
-                    {
-                        "risque": "Éboulement soudain",
-                        "mesures": "Contrôler les fouilles après pluie ou vibration importante.",
-                        "controles": "Inspection après intempéries et vérification blindage."
-                    }
-                ]
-            },
-            "travaux_de_nuit": {
-                "label": "Travaux de nuit",
-                "items": [
-                    {
-                        "risque": "Mauvaise visibilité",
-                        "mesures": "Installer un éclairage suffisant et renforcer la signalisation chantier.",
-                        "controles": "Contrôle du fonctionnement de l’éclairage et visibilité des panneaux."
-                    }
-                ]
-            },
-            "pr_sence_canalisations_gaz": {
-                "label": "Présence canalisations gaz",
-                "items": [
-                    {
-                        "risque": "Explosion",
-                        "mesures": "Identifier les réseaux gaz et appliquer les procédures de sécurité.",
-                        "controles": "Contrôle localisation réseaux et respect des distances."
-                    }
-                ]
-            },
-            "travail_manuel_en_fouille": {
-                "label": "Travail manuel en fouille",
-                "items": [
-                    {
-                        "risque": "TMS",
-                        "mesures": "Utiliser des aides mécaniques pour limiter les manutentions manuelles.",
-                        "controles": "Contrôle des manutentions et rotation du personnel."
-                    }
-                ]
-            },
-            "bruit_engins_chantier": {
-                "label": "Bruit engins chantier",
-                "items": [
-                    {
-                        "risque": "Atteinte auditive",
-                        "mesures": "Fournir des protections auditives adaptées aux opérateurs.",
-                        "controles": "Contrôle du port des protections auditives."
-                    }
-                ]
-            },
-            "poussi_res_terrassement": {
-                "label": "Poussières terrassement",
-                "items": [
-                    {
-                        "risque": "Inhalation poussières",
-                        "mesures": "Limiter les émissions de poussières par arrosage ou aspiration.",
-                        "controles": "Contrôle arrosage chantier et port des masques adaptés."
-                    }
-                ]
-            }
-        }
-    },
-    "chute_d_outillage_objet": {
-        "label": "Chute d'outillage & objet",
-        "sources": {
-            "travail_en_hauteur": {
-                "label": "Travail en hauteur",
-                "items": [
-                    {
-                        "risque": "Chute d’outils",
-                        "mesures": "Attacher les outils utilisés en hauteur et sécuriser les zones de travail.",
-                        "controles": "Vérification des attaches-outils et du balisage des zones."
-                    }
-                ]
-            },
-            "travail_sur_chafaudage": {
-                "label": "Travail sur échafaudage",
-                "items": [
-                    {
-                        "risque": "Chute de matériaux",
-                        "mesures": "Organiser un stockage stable et sécurisé des matériaux.",
-                        "controles": "Contrôle de la stabilité des stockages et des protections périphériques."
-                    }
-                ]
-            },
-            "levage_de_mat_riel": {
-                "label": "Levage de matériel",
-                "items": [
-                    {
-                        "risque": "Chute de charge",
-                        "mesures": "Contrôler les accessoires de levage et interdire l’accès sous les charges.",
-                        "controles": "Vérification des élingues et des zones interdites."
-                    }
-                ]
-            },
-            "manutention_en_hauteur": {
-                "label": "Manutention en hauteur",
-                "items": [
-                    {
-                        "risque": "Perte de matériel",
-                        "mesures": "Ranger et fixer correctement le matériel sur les postes de travail.",
-                        "controles": "Contrôle du rangement et de la fixation du matériel."
-                    }
-                ]
-            },
-            "stockage_en_hauteur": {
-                "label": "Stockage en hauteur",
-                "items": [
-                    {
-                        "risque": "Chute d’objets stockés",
-                        "mesures": "Empiler les matériaux de manière stable et sécurisée.",
-                        "controles": "Inspection des zones de stockage et stabilité des charges."
-                    }
-                ]
-            },
-            "utilisation_grue": {
-                "label": "Utilisation grue",
-                "items": [
-                    {
-                        "risque": "Décrochage charge",
-                        "mesures": "Utiliser des systèmes d’élingage conformes et adaptés à la charge.",
-                        "controles": "Contrôle des élingues, crochets et accessoires de levage."
-                    }
-                ]
-            },
-            "pose_d_pose_coffrage": {
-                "label": "Pose/dépose coffrage",
-                "items": [
-                    {
-                        "risque": "Chute élément coffrage",
-                        "mesures": "Vérifier le maintien et la stabilité des éléments de coffrage.",
-                        "controles": "Contrôle quotidien des fixations et appuis de coffrage."
-                    }
-                ]
-            },
-            "ferraillage": {
-                "label": "Ferraillage",
-                "items": [
-                    {
-                        "risque": "Chute fers ou outils",
-                        "mesures": "Prévoir des zones de rangement sécurisées pour fers et outillages.",
-                        "controles": "Vérification du rangement et des protections collectives."
-                    }
-                ]
-            },
-            "travaux_toiture": {
-                "label": "Travaux toiture",
-                "items": [
-                    {
-                        "risque": "Chute matériaux toiture",
-                        "mesures": "Installer des protections périphériques et filets de sécurité.",
-                        "controles": "Contrôle des garde-corps, filets et stockage toiture."
-                    }
-                ]
-            },
-            "travail_nacelle": {
-                "label": "Travail nacelle",
-                "items": [
-                    {
-                        "risque": "Chute outils depuis nacelle",
-                        "mesures": "Attacher les outils utilisés en nacelle et sécuriser la zone inférieure.",
-                        "controles": "Vérification des attaches-outils et du balisage au sol."
-                    }
-                ]
-            },
-            "utilisation_disqueuse": {
-                "label": "Utilisation disqueuse",
-                "items": [
-                    {
-                        "risque": "Projection fragments",
-                        "mesures": "Utiliser des carters de protection et écrans adaptés.",
-                        "controles": "Contrôle des protections sur les outils électroportatifs."
-                    }
-                ]
-            },
-            "marteau_piqueur": {
-                "label": "Marteau piqueur",
-                "items": [
-                    {
-                        "risque": "Projection débris",
-                        "mesures": "Installer des écrans de protection et limiter les accès aux zones exposées.",
-                        "controles": "Vérification des écrans et balisage des zones à risque."
-                    }
-                ]
-            },
-            "chargement_d_chargement": {
-                "label": "Chargement/déchargement",
-                "items": [
-                    {
-                        "risque": "Chute palettes",
-                        "mesures": "Stocker les palettes sur une surface stable et adaptée.",
-                        "controles": "Contrôle stabilité palettes et conditions de stockage."
-                    }
-                ]
-            },
-            "d_placement_mat_riaux": {
-                "label": "Déplacement matériaux",
-                "items": [
-                    {
-                        "risque": "Renversement matériel",
-                        "mesures": "Stabiliser les équipements et respecter les charges admissibles.",
-                        "controles": "Inspection du matériel et contrôle des appuis."
-                    }
-                ]
-            },
-            "d_molition": {
-                "label": "Démolition",
-                "items": [
-                    {
-                        "risque": "Chute gravats",
-                        "mesures": "Évacuer régulièrement les gravats et sécuriser les zones de déchargement.",
-                        "controles": "Contrôle de l’évacuation des déchets et propreté chantier."
-                    }
-                ]
-            },
-            "travaux_simultan_s": {
-                "label": "Travaux simultanés",
-                "items": [
-                    {
-                        "risque": "Chute objet sur autre équipe",
-                        "mesures": "Organiser les travaux en coactivité et interdire les passages sous zones de travail.",
-                        "controles": "Vérification du balisage et coordination entre équipes."
-                    }
-                ]
-            },
-            "utilisation_chelle": {
-                "label": "Utilisation échelle",
-                "items": [
-                    {
-                        "risque": "Chute outil tenu à la main",
-                        "mesures": "Utiliser des dragonnes ou systèmes de retenue des outils.",
-                        "controles": "Contrôle des équipements de retenue des outils."
-                    }
-                ]
-            },
-            "passage_sous_zone_hauteur": {
-                "label": "Passage sous zone hauteur",
-                "items": [
-                    {
-                        "risque": "Heurt par objet tombant",
-                        "mesures": "Installer des protections collectives et zones interdites sous travaux en hauteur.",
-                        "controles": "Vérification des filets, plinthes et balisage."
-                    }
-                ]
-            },
-            "vent_fort": {
-                "label": "Vent fort",
-                "items": [
-                    {
-                        "risque": "Envol objets",
-                        "mesures": "Stabiliser et arrimer les matériaux exposés au vent.",
-                        "controles": "Contrôle des fixations et surveillance météo."
-                    }
-                ]
-            },
-            "nettoyage_chantier": {
-                "label": "Nettoyage chantier",
-                "items": [
-                    {
-                        "risque": "Chute objets mal stockés",
-                        "mesures": "Prévoir un stockage organisé et sécurisé des matériaux et outils.",
-                        "controles": "Inspection régulière des zones de stockage et rangement."
-                    }
-                ]
-            }
-        }
-    },
-    "engin_mat_riel_produit": {
-        "label": "Engin, matériel & produit",
-        "sources": {
-            "conduite_d_engins_de_chantier": {
-                "label": "Conduite d’engins de chantier",
-                "items": [
-                    {
-                        "risque": "Collision engin/piéton",
-                        "mesures": "Mettre en place un plan de circulation séparant les zones piétons et engins.",
-                        "controles": "Contrôle du balisage, des voies de circulation et du respect des consignes."
-                    }
-                ]
-            },
-            "man_uvre_engins": {
-                "label": "Manœuvre engins",
-                "items": [
-                    {
-                        "risque": "Angle mort",
-                        "mesures": "Prévoir une aide-manœuvre et des alarmes de recul sur les engins.",
-                        "controles": "Vérification des alarmes, caméras et présence d’un signaleur."
-                    }
-                ]
-            },
-            "utilisation_mini_pelle": {
-                "label": "Utilisation mini-pelle",
-                "items": [
-                    {
-                        "risque": "Renversement engin",
-                        "mesures": "Utiliser des engins adaptés au terrain et respecter les charges admissibles.",
-                        "controles": "Contrôle stabilité terrain et vérification des autorisations conducteurs."
-                    }
-                ]
-            },
-            "chargement_d_chargement_mat_riel": {
-                "label": "Chargement/déchargement matériel",
-                "items": [
-                    {
-                        "risque": "Chute de charge",
-                        "mesures": "Contrôler les accessoires de levage et interdire l’accès sous les charges.",
-                        "controles": "Inspection des élingues et contrôle des zones interdites."
-                    }
-                ]
-            },
-            "utilisation_grue": {
-                "label": "Utilisation grue",
-                "items": [
-                    {
-                        "risque": "Rupture élingue",
-                        "mesures": "Utiliser des élingues conformes et adaptées aux charges levées.",
-                        "controles": "Vérification périodique des élingues et accessoires de levage."
-                    }
-                ]
-            },
-            "utilisation_chariot_l_vateur": {
-                "label": "Utilisation chariot élévateur",
-                "items": [
-                    {
-                        "risque": "Basculement",
-                        "mesures": "Stabiliser les équipements et utiliser des appuis adaptés.",
-                        "controles": "Contrôle des stabilisateurs et de la surface d’appui."
-                    }
-                ]
-            },
-            "travaux_avec_nacelle": {
-                "label": "Travaux avec nacelle",
-                "items": [
-                    {
-                        "risque": "Chute opérateur",
-                        "mesures": "Installer des accès sécurisés et utiliser les protections antichute.",
-                        "controles": "Contrôle des garde-corps, harnais et accès équipements."
-                    }
-                ]
-            },
-            "utilisation_outillage_lectrique": {
-                "label": "Utilisation outillage électrique",
-                "items": [
-                    {
-                        "risque": "Électrocution",
-                        "mesures": "Consigner les installations électriques avant intervention.",
-                        "controles": "Vérification absence tension et contrôle habilitations électriques."
-                    }
-                ]
-            },
-            "utilisation_disqueuse": {
-                "label": "Utilisation disqueuse",
-                "items": [
-                    {
-                        "risque": "Coupure / projection",
-                        "mesures": "Utiliser des outils équipés de carters de protection.",
-                        "controles": "Contrôle des protections et état des outils."
-                    }
-                ]
-            },
-            "utilisation_marteau_piqueur": {
-                "label": "Utilisation marteau-piqueur",
-                "items": [
-                    {
-                        "risque": "Vibrations",
-                        "mesures": "Limiter le temps d’utilisation des équipements vibrants.",
-                        "controles": "Contrôle de l’exposition et rotation du personnel."
-                    }
-                ]
-            },
-            "utilisation_compresseur": {
-                "label": "Utilisation compresseur",
-                "items": [
-                    {
-                        "risque": "Rupture flexible",
-                        "mesures": "Contrôler régulièrement l’état des flexibles hydrauliques.",
-                        "controles": "Inspection visuelle des flexibles et raccords avant utilisation."
-                    }
-                ]
-            },
-            "maintenance_mat_riel": {
-                "label": "Maintenance matériel",
-                "items": [
-                    {
-                        "risque": "Démarrage intempestif",
-                        "mesures": "Mettre en place une procédure de consignation des équipements.",
-                        "controles": "Vérification des procédures de consignation et verrouillage."
-                    }
-                ]
-            },
-            "manipulation_bouteilles_gaz": {
-                "label": "Manipulation bouteilles gaz",
-                "items": [
-                    {
-                        "risque": "Explosion / incendie",
-                        "mesures": "Stocker les produits inflammables dans des zones sécurisées.",
-                        "controles": "Contrôle extincteurs, stockage et permis feu."
-                    }
-                ]
-            },
-            "utilisation_carburants": {
-                "label": "Utilisation carburants",
-                "items": [
-                    {
-                        "risque": "Inflammation",
-                        "mesures": "Éloigner toute source de chaleur des produits inflammables.",
-                        "controles": "Vérification des zones de stockage et signalisation danger."
-                    }
-                ]
-            },
-            "produits_chimiques_chantier": {
-                "label": "Produits chimiques chantier",
-                "items": [
-                    {
-                        "risque": "Contact produit dangereux",
-                        "mesures": "Mettre à disposition les FDS et utiliser des EPI adaptés.",
-                        "controles": "Contrôle présence FDS et port des protections individuelles."
-                    }
-                ]
-            },
-            "ciment_et_adjuvants": {
-                "label": "Ciment et adjuvants",
-                "items": [
-                    {
-                        "risque": "Brûlure chimique",
-                        "mesures": "Prévoir des moyens de rinçage et protections chimiques adaptées.",
-                        "controles": "Vérification des douches oculaires et EPI chimiques."
-                    }
-                ]
-            },
-            "peintures_solvants": {
-                "label": "Peintures / solvants",
-                "items": [
-                    {
-                        "risque": "Inhalation vapeurs",
-                        "mesures": "Assurer une ventilation adaptée des zones de travail.",
-                        "controles": "Contrôle ventilation et port des protections respiratoires."
-                    }
-                ]
-            },
-            "nettoyage_mat_riel": {
-                "label": "Nettoyage matériel",
-                "items": [
-                    {
-                        "risque": "Projection produit",
-                        "mesures": "Utiliser des écrans de protection et équipements adaptés.",
-                        "controles": "Contrôle des écrans et protections individuelles."
-                    }
-                ]
-            },
-            "transport_mat_riel_manuel": {
-                "label": "Transport matériel manuel",
-                "items": [
-                    {
-                        "risque": "TMS",
-                        "mesures": "Limiter les manutentions manuelles et utiliser des aides mécaniques.",
-                        "controles": "Contrôle des manutentions et organisation du poste de travail."
-                    }
-                ]
-            },
-            "utilisation_scie_circulaire": {
-                "label": "Utilisation scie circulaire",
-                "items": [
-                    {
-                        "risque": "Coupure grave",
-                        "mesures": "Utiliser des équipements de protection adaptés aux travaux de coupe.",
-                        "controles": "Contrôle des gants anticoupure et outils utilisés."
-                    }
-                ]
-            },
-            "stockage_mat_riel": {
-                "label": "Stockage matériel",
-                "items": [
-                    {
-                        "risque": "Chute d’objets",
-                        "mesures": "Sécuriser les zones de stockage et travaux en hauteur.",
-                        "controles": "Vérification des protections collectives et du rangement."
-                    }
-                ]
-            },
-            "flexible_hydraulique": {
-                "label": "Flexible hydraulique",
-                "items": [
-                    {
-                        "risque": "Rupture sous pression",
-                        "mesures": "Contrôler les équipements sous pression avant utilisation.",
-                        "controles": "Inspection des flexibles, raccords et soupapes de sécurité."
-                    }
-                ]
-            },
-            "batterie_engin": {
-                "label": "Batterie engin",
-                "items": [
-                    {
-                        "risque": "Projection acide",
-                        "mesures": "Utiliser des protections chimiques adaptées et procédures sécurisées.",
-                        "controles": "Vérification des EPI chimiques et des zones de manipulation."
-                    }
-                ]
-            },
-            "bruit_engins_chantier": {
-                "label": "Bruit engins chantier",
-                "items": [
-                    {
-                        "risque": "Atteinte auditive",
-                        "mesures": "Fournir des protections auditives adaptées aux opérateurs.",
-                        "controles": "Contrôle du port des protections auditives et exposition bruit."
-                    }
-                ]
-            },
-            "gaz_chappement_engins": {
-                "label": "Gaz échappement engins",
-                "items": [
-                    {
-                        "risque": "Inhalation fumées",
-                        "mesures": "Ventiler les zones de travail et limiter l’exposition aux fumées.",
-                        "controles": "Contrôle de la ventilation et des protections respiratoires."
-                    }
-                ]
-            }
-        }
-    },
-    "techniques_lectriques": {
-        "label": "Techniques électriques",
-        "sources": {
-            "travaux_sur_installation_sous_tension": {
-                "label": "Travaux sur installation sous tension",
-                "items": [
-                    {
-                        "risque": "Contact électrique direct",
-                        "mesures": "Mettre hors tension les installations avant toute intervention et appliquer une procédure de consignation.",
-                        "controles": "Vérification d’absence de tension et contrôle des consignations."
-                    }
-                ]
-            },
-            "utilisation_coffret_chantier": {
-                "label": "Utilisation coffret chantier",
-                "items": [
-                    {
-                        "risque": "Contact indirect",
-                        "mesures": "Installer des protections différentielles et assurer la mise à la terre des équipements.",
-                        "controles": "Contrôle des dispositifs différentiels et vérification de la terre."
-                    }
-                ]
-            },
-            "rallonges_et_c_bles_lectriques": {
-                "label": "Rallonges et câbles électriques",
-                "items": [
-                    {
-                        "risque": "Câble endommagé",
-                        "mesures": "Protéger les câbles électriques contre les chocs, coupures et passages d’engins.",
-                        "controles": "Inspection quotidienne des câbles et prises électriques."
-                    }
-                ]
-            },
-            "utilisation_outillage_lectrique": {
-                "label": "Utilisation outillage électrique",
-                "items": [
-                    {
-                        "risque": "Défaut matériel",
-                        "mesures": "Utiliser uniquement du matériel conforme et vérifié périodiquement.",
-                        "controles": "Contrôle des certificats de conformité et inspections régulières."
-                    }
-                ]
-            },
-            "travaux_pr_s_lignes_a_riennes": {
-                "label": "Travaux près lignes aériennes",
-                "items": [
-                    {
-                        "risque": "Arc électrique",
-                        "mesures": "Porter des EPI adaptés et respecter les distances de sécurité.",
-                        "controles": "Vérification des équipements de protection et des habilitations."
-                    }
-                ]
-            },
-            "passage_c_bles_au_sol": {
-                "label": "Passage câbles au sol",
-                "items": [
-                    {
-                        "risque": "Trébuchement",
-                        "mesures": "Ranger et protéger les câbles au sol afin d’éviter les obstacles.",
-                        "controles": "Contrôle du rangement chantier et des passages sécurisés."
-                    }
-                ]
-            },
-            "raccordement_tableau_lectrique": {
-                "label": "Raccordement tableau électrique",
-                "items": [
-                    {
-                        "risque": "Court-circuit",
-                        "mesures": "Installer des protections adaptées et éviter les surcharges électriques.",
-                        "controles": "Vérification des disjoncteurs et protections électriques."
-                    }
-                ]
-            },
-            "utilisation_groupe_lectrog_ne": {
-                "label": "Utilisation groupe électrogène",
-                "items": [
-                    {
-                        "risque": "Intoxication fumées",
-                        "mesures": "Prévoir une ventilation adaptée lors des interventions électriques.",
-                        "controles": "Contrôle du système de ventilation et des équipements respiratoires."
-                    }
-                ]
-            },
-            "maintenance_lectrique": {
-                "label": "Maintenance électrique",
-                "items": [
-                    {
-                        "risque": "Remise sous tension accidentelle",
-                        "mesures": "Appliquer une procédure stricte de consignation et verrouillage.",
-                        "controles": "Contrôle des cadenas de consignation et autorisations d’intervention."
-                    }
-                ]
-            },
-            "travail_en_milieu_humide": {
-                "label": "Travail en milieu humide",
-                "items": [
-                    {
-                        "risque": "Conductivité accrue",
-                        "mesures": "Éviter les interventions en milieu humide sans protections adaptées.",
-                        "controles": "Vérification des conditions de travail et matériel IP adapté."
-                    }
-                ]
-            },
-            "per_age_proche_c_bles": {
-                "label": "Perçage proche câbles",
-                "items": [
-                    {
-                        "risque": "Percement réseau",
-                        "mesures": "Réaliser un repérage préalable des réseaux avant percement ou forage.",
-                        "controles": "Contrôle des plans réseaux et marquage des zones sensibles."
-                    }
-                ]
-            },
-            "armoires_lectriques_ouvertes": {
-                "label": "Armoires électriques ouvertes",
-                "items": [
-                    {
-                        "risque": "Contact pièces nues",
-                        "mesures": "Installer des protections physiques sur les parties sous tension accessibles.",
-                        "controles": "Inspection des coffrets et protections électriques."
-                    }
-                ]
-            },
-            "travaux_de_nuit": {
-                "label": "Travaux de nuit",
-                "items": [
-                    {
-                        "risque": "Mauvaise visibilité",
-                        "mesures": "Assurer un éclairage suffisant des zones d’intervention.",
-                        "controles": "Vérification du fonctionnement de l’éclairage chantier."
-                    }
-                ]
-            },
-            "utilisation_clairage_chantier": {
-                "label": "Utilisation éclairage chantier",
-                "items": [
-                    {
-                        "risque": "Défaut isolation",
-                        "mesures": "Contrôler régulièrement l’état des isolants et équipements électriques.",
-                        "controles": "Inspection des gaines, câbles et matériels isolants."
-                    }
-                ]
-            },
-            "batteries_et_chargeurs": {
-                "label": "Batteries et chargeurs",
-                "items": [
-                    {
-                        "risque": "Projection acide",
-                        "mesures": "Manipuler les batteries et produits chimiques avec protections adaptées.",
-                        "controles": "Vérification des EPI chimiques et présence moyens de rinçage."
-                    }
-                ]
-            },
-            "surcharge_circuit": {
-                "label": "Surcharge circuit",
-                "items": [
-                    {
-                        "risque": "Échauffement",
-                        "mesures": "Éviter les surcharges et assurer une ventilation suffisante des équipements.",
-                        "controles": "Contrôle de température des installations et ventilation."
-                    }
-                ]
-            },
-            "pr_sence_eau_pr_s_installation": {
-                "label": "Présence eau près installation",
-                "items": [
-                    {
-                        "risque": "Court-circuit",
-                        "mesures": "Utiliser des équipements adaptés à la puissance demandée.",
-                        "controles": "Contrôle des branchements et protections électriques."
-                    }
-                ]
-            },
-            "utilisation_transformateurs": {
-                "label": "Utilisation transformateurs",
-                "items": [
-                    {
-                        "risque": "Défaut matériel",
-                        "mesures": "Retirer immédiatement du service tout matériel défectueux.",
-                        "controles": "Vérification avant utilisation et suivi maintenance."
-                    }
-                ]
-            },
-            "coactivit_chantier": {
-                "label": "Coactivité chantier",
-                "items": [
-                    {
-                        "risque": "Détérioration câbles",
-                        "mesures": "Ranger correctement les câbles et éviter les écrasements.",
-                        "controles": "Contrôle visuel quotidien des câbles et protections mécaniques."
-                    }
-                ]
-            },
-            "intervention_non_habilit_e": {
-                "label": "Intervention non habilitée",
-                "items": [
-                    {
-                        "risque": "Mauvaise manipulation",
-                        "mesures": "Réserver les interventions électriques au personnel habilité et formé.",
-                        "controles": "Vérification des habilitations et contrôle des pratiques terrain."
-                    }
-                ]
-            }
-        }
-    },
-    "proximit_voirie": {
-        "label": "Proximité voirie",
-        "sources": {
-            "chantier_en_bord_de_route": {
-                "label": "Chantier en bord de route",
-                "items": [
-                    {
-                        "risque": "Collision avec véhicule",
-                        "mesures": "Mettre en place un balisage et une signalisation réglementaire autour du chantier.",
-                        "controles": "Contrôle quotidien du balisage et de la signalisation temporaire."
-                    }
-                ]
-            },
-            "circulation_dense": {
-                "label": "Circulation dense",
-                "items": [
-                    {
-                        "risque": "Heurt par usager",
-                        "mesures": "Séparer physiquement les zones chantier de la circulation publique.",
-                        "controles": "Vérification des barrières et protections de séparation."
-                    }
-                ]
-            },
-            "travers_e_chauss_e": {
-                "label": "Traversée chaussée",
-                "items": [
-                    {
-                        "risque": "Accident piéton",
-                        "mesures": "Prévoir des cheminements piétons sécurisés et clairement signalés.",
-                        "controles": "Contrôle des accès piétons et des déviations mises en place."
-                    }
-                ]
-            },
-            "entr_e_sortie_chantier": {
-                "label": "Entrée/sortie chantier",
-                "items": [
-                    {
-                        "risque": "Collision engins/véhicules",
-                        "mesures": "Organiser les entrées et sorties de chantier avec un plan de circulation.",
-                        "controles": "Vérification des accès chantier et circulation des engins."
-                    }
-                ]
-            },
-            "chargement_d_chargement_voirie": {
-                "label": "Chargement/déchargement voirie",
-                "items": [
-                    {
-                        "risque": "Heurt par véhicule",
-                        "mesures": "Délimiter les zones de travail et renforcer la visibilité du personnel.",
-                        "controles": "Contrôle du port des gilets haute visibilité et du balisage."
-                    }
-                ]
-            },
-            "man_uvre_engins_chantier": {
-                "label": "Manœuvre engins chantier",
-                "items": [
-                    {
-                        "risque": "Angle mort",
-                        "mesures": "Prévoir une aide-manœuvre et des alarmes de recul pour les engins.",
-                        "controles": "Vérification des alarmes, caméras et présence signaleur."
-                    }
-                ]
-            },
-            "r_duction_voies_circulation": {
-                "label": "Réduction voies circulation",
-                "items": [
-                    {
-                        "risque": "Accrochage véhicules",
-                        "mesures": "Installer une signalisation temporaire adaptée aux conditions de circulation.",
-                        "controles": "Contrôle de la signalisation et de sa visibilité."
-                    }
-                ]
-            },
-            "travaux_de_nuit": {
-                "label": "Travaux de nuit",
-                "items": [
-                    {
-                        "risque": "Mauvaise visibilité",
-                        "mesures": "Renforcer l’éclairage du chantier et utiliser des dispositifs réfléchissants.",
-                        "controles": "Vérification du fonctionnement des éclairages chantier."
-                    }
-                ]
-            },
-            "travaux_sous_pluie": {
-                "label": "Travaux sous pluie",
-                "items": [
-                    {
-                        "risque": "Glissade / perte contrôle",
-                        "mesures": "Maintenir les accès propres et sécurisés, notamment par mauvais temps.",
-                        "controles": "Contrôle du nettoyage et de l’état des chaussées."
-                    }
-                ]
-            },
-            "utilisation_balisage_insuffisant": {
-                "label": "Utilisation balisage insuffisant",
-                "items": [
-                    {
-                        "risque": "Intrusion véhicules",
-                        "mesures": "Installer des barrières et dispositifs empêchant l’accès au chantier.",
-                        "controles": "Vérification des protections physiques et accès sécurisés."
-                    }
-                ]
-            },
-            "intervention_urgence_voirie": {
-                "label": "Intervention urgence voirie",
-                "items": [
-                    {
-                        "risque": "Stress / précipitation",
-                        "mesures": "Organiser les interventions afin d’éviter les situations d’urgence improvisées.",
-                        "controles": "Contrôle du respect des procédures et coordination chantier."
-                    }
-                ]
-            },
-            "ouverture_tranch_e_voirie": {
-                "label": "Ouverture tranchée voirie",
-                "items": [
-                    {
-                        "risque": "Chute usager",
-                        "mesures": "Sécuriser les tranchées et ouvertures par des protections adaptées.",
-                        "controles": "Contrôle des garde-corps, plaques et barrières de sécurité."
-                    }
-                ]
-            },
-            "pi_tons_proches_chantier": {
-                "label": "Piétons proches chantier",
-                "items": [
-                    {
-                        "risque": "Heurt matériel",
-                        "mesures": "Organiser le stockage du matériel hors des zones de circulation.",
-                        "controles": "Vérification des zones de stockage et encombrements."
-                    }
-                ]
-            },
-            "utilisation_grue_pr_s_voirie": {
-                "label": "Utilisation grue près voirie",
-                "items": [
-                    {
-                        "risque": "Chute charge sur circulation",
-                        "mesures": "Interdire la circulation sous les opérations de levage.",
-                        "controles": "Contrôle des zones interdites et des manœuvres de levage."
-                    }
-                ]
-            },
-            "stockage_mat_riel_voirie": {
-                "label": "Stockage matériel voirie",
-                "items": [
-                    {
-                        "risque": "Obstacle circulation",
-                        "mesures": "Maintenir les voies publiques dégagées et correctement signalées.",
-                        "controles": "Contrôle des obstacles et nettoyage des accès."
-                    }
-                ]
-            },
-            "poussi_res_chantier": {
-                "label": "Poussières chantier",
-                "items": [
-                    {
-                        "risque": "Réduction visibilité",
-                        "mesures": "Limiter les poussières et projections par arrosage ou nettoyage.",
-                        "controles": "Contrôle de l’arrosage et visibilité des accès."
-                    }
-                ]
-            },
-            "bruit_circulation": {
-                "label": "Bruit circulation",
-                "items": [
-                    {
-                        "risque": "Mauvaise communication",
-                        "mesures": "Prévoir des moyens de communication adaptés entre équipes et conducteurs.",
-                        "controles": "Vérification des radios, signaux et briefings sécurité."
-                    }
-                ]
-            },
-            "travaux_proches_carrefour": {
-                "label": "Travaux proches carrefour",
-                "items": [
-                    {
-                        "risque": "Risque multiple collision",
-                        "mesures": "Renforcer la signalisation dans les zones complexes ou à fort trafic.",
-                        "controles": "Contrôle de la signalisation renforcée et circulation chantier."
-                    }
-                ]
-            },
-            "recul_engins_chantier": {
-                "label": "Recul engins chantier",
-                "items": [
-                    {
-                        "risque": "Heurt usager",
-                        "mesures": "Mettre en place des déviations et protections pour les usagers.",
-                        "controles": "Vérification des déviations et sécurisation des passages."
-                    }
-                ]
-            },
-            "conditions_m_t_o": {
-                "label": "Conditions météo",
-                "items": [
-                    {
-                        "risque": "Perte adhérence",
-                        "mesures": "Adapter la circulation aux conditions climatiques et nettoyer les voiries.",
-                        "controles": "Contrôle de l’état des chaussées et application des consignes météo."
-                    }
-                ]
-            }
-        }
-    },
-    "organisation_chantier": {
-        "label": "Organisation chantier",
-        "sources": {
-            "mauvaise_organisation_g_n_rale": {
-                "label": "Mauvaise organisation générale",
-                "items": [
-                    {
-                        "risque": "Désordre chantier",
-                        "mesures": "Maintenir le chantier propre et organiser les zones de stockage.",
-                        "controles": "Contrôle quotidien du rangement et des accès chantier."
-                    }
-                ]
-            },
-            "coactivit_entreprises": {
-                "label": "Coactivité entreprises",
-                "items": [
-                    {
-                        "risque": "Interférence travaux",
-                        "mesures": "Planifier les interventions et coordonner les entreprises présentes.",
-                        "controles": "Réunions de coordination SPS et suivi planning."
-                    }
-                ]
-            },
-            "circulation_interne": {
-                "label": "Circulation interne",
-                "items": [
-                    {
-                        "risque": "Collision engins/piétons",
-                        "mesures": "Mettre en place un plan de circulation séparant piétons et engins.",
-                        "controles": "Vérification du balisage et des cheminements sécurisés."
-                    }
-                ]
-            },
-            "acc_s_chantier_non_contr_l": {
-                "label": "Accès chantier non contrôlé",
-                "items": [
-                    {
-                        "risque": "Intrusion",
-                        "mesures": "Clôturer le chantier et contrôler les accès.",
-                        "controles": "Contrôle des clôtures et du registre des accès."
-                    }
-                ]
-            },
-            "stockage_mat_riaux": {
-                "label": "Stockage matériaux",
-                "items": [
-                    {
-                        "risque": "Chute matériel",
-                        "mesures": "Organiser un stockage stable et sécurisé des matériaux.",
-                        "controles": "Inspection des zones de stockage et stabilité des charges."
-                    }
-                ]
-            },
-            "mauvais_rangement_chantier": {
-                "label": "Mauvais rangement chantier",
-                "items": [
-                    {
-                        "risque": "Chute plain-pied",
-                        "mesures": "Maintenir les circulations dégagées et propres.",
-                        "controles": "Contrôle du nettoyage et de l’éclairage des accès."
-                    }
-                ]
-            },
-            "signalisation_insuffisante": {
-                "label": "Signalisation insuffisante",
-                "items": [
-                    {
-                        "risque": "Mauvaise information",
-                        "mesures": "Afficher clairement les consignes et plans de sécurité.",
-                        "controles": "Vérification des affichages réglementaires."
-                    }
-                ]
-            },
-            "absence_briefing_s_curit": {
-                "label": "Absence briefing sécurité",
-                "items": [
-                    {
-                        "risque": "Méconnaissance risques",
-                        "mesures": "Réaliser un accueil sécurité et des briefings réguliers.",
-                        "controles": "Contrôle des présences aux formations et causeries sécurité."
-                    }
-                ]
-            },
-            "travail_simultan_hauteur_sol": {
-                "label": "Travail simultané hauteur/sol",
-                "items": [
-                    {
-                        "risque": "Chute objet",
-                        "mesures": "Installer des protections collectives et baliser les zones exposées.",
-                        "controles": "Contrôle des filets, plinthes et zones interdites."
-                    }
-                ]
-            },
-            "zones_dangereuses_non_balis_es": {
-                "label": "Zones dangereuses non balisées",
-                "items": [
-                    {
-                        "risque": "Intrusion accidentelle",
-                        "mesures": "Délimiter et signaler les zones dangereuses.",
-                        "controles": "Vérification du balisage et des barrières de sécurité."
-                    }
-                ]
-            },
-            "manque_clairage_chantier": {
-                "label": "Manque éclairage chantier",
-                "items": [
-                    {
-                        "risque": "Mauvaise visibilité",
-                        "mesures": "Installer un éclairage suffisant dans les zones de travail.",
-                        "controles": "Contrôle du fonctionnement des éclairages chantier."
-                    }
-                ]
-            },
-            "conditions_m_t_o": {
-                "label": "Conditions météo",
-                "items": [
-                    {
-                        "risque": "Désorganisation",
-                        "mesures": "Adapter le planning et assurer le suivi des interventions.",
-                        "controles": "Contrôle du planning chantier et coordination quotidienne."
-                    }
-                ]
-            },
-            "gestion_d_chets_insuffisante": {
-                "label": "Gestion déchets insuffisante",
-                "items": [
-                    {
-                        "risque": "Coupures, incendie",
-                        "mesures": "Évacuer régulièrement les déchets et sécuriser les matériaux dangereux.",
-                        "controles": "Vérification du rangement et présence extincteurs."
-                    }
-                ]
-            },
-            "produits_dangereux_mal_stock_s": {
-                "label": "Produits dangereux mal stockés",
-                "items": [
-                    {
-                        "risque": "Incendie / intoxication",
-                        "mesures": "Stocker les produits dangereux conformément aux FDS.",
-                        "controles": "Contrôle des zones de stockage et ventilation."
-                    }
-                ]
-            },
-            "absence_plan_secours": {
-                "label": "Absence plan secours",
-                "items": [
-                    {
-                        "risque": "Retard intervention",
-                        "mesures": "Maintenir les accès secours libres et prévoir les procédures d’urgence.",
-                        "controles": "Vérification des accès secours et affichage des consignes."
-                    }
-                ]
-            },
-            "mauvaise_communication": {
-                "label": "Mauvaise communication",
-                "items": [
-                    {
-                        "risque": "Erreur manœuvre",
-                        "mesures": "Organiser des briefings et assurer une communication adaptée.",
-                        "controles": "Contrôle des moyens de communication et procédures."
-                    }
-                ]
-            },
-            "acc_s_secours_obstru_s": {
-                "label": "Accès secours obstrués",
-                "items": [
-                    {
-                        "risque": "Difficulté évacuation",
-                        "mesures": "Maintenir les voies d’évacuation dégagées et balisées.",
-                        "controles": "Inspection des accès d’évacuation et issues secours."
-                    }
-                ]
-            },
-            "personnel_non_form": {
-                "label": "Personnel non formé",
-                "items": [
-                    {
-                        "risque": "Mauvaise utilisation matériel",
-                        "mesures": "Former le personnel à l’utilisation correcte des équipements.",
-                        "controles": "Vérification des habilitations et contrôles terrain."
-                    }
-                ]
-            },
-            "fatigue_surcharge_travail": {
-                "label": "Fatigue / surcharge travail",
-                "items": [
-                    {
-                        "risque": "Inattention",
-                        "mesures": "Respecter les temps de pause et limiter la fatigue.",
-                        "controles": "Contrôle des horaires et rotation du personnel."
-                    }
-                ]
-            },
-            "travaux_non_autoris_s": {
-                "label": "Travaux non autorisés",
-                "items": [
-                    {
-                        "risque": "Intervention dangereuse",
-                        "mesures": "Mettre en place des autorisations de travail spécifiques.",
-                        "controles": "Contrôle des permis de travail et procédures sécurité."
-                    }
-                ]
-            }
-        }
-    },
-    "conditions_climatiques": {
-        "label": "Conditions climatiques",
-        "sources": {
-            "forte_pluie": {
-                "label": "Forte pluie",
-                "items": [
-                    {
-                        "risque": "Sol glissant",
-                        "mesures": "Nettoyer et sécuriser les accès en cas d’intempéries.",
-                        "controles": "Contrôle quotidien des cheminements et accès chantier."
-                    },
-                    {
-                        "risque": "Inondation fouilles",
-                        "mesures": "Prévoir un pompage et drainage des fouilles.",
-                        "controles": "Contrôle des systèmes de pompage et état des fouilles."
-                    }
-                ]
-            },
-            "vent_fort": {
-                "label": "Vent fort",
-                "items": [
-                    {
-                        "risque": "Chute d’objets",
-                        "mesures": "Suspendre les travaux en hauteur en cas de vent fort.",
-                        "controles": "Contrôle météo et application des consignes d’arrêt."
-                    },
-                    {
-                        "risque": "Déséquilibre travail hauteur",
-                        "mesures": "Arrêter les travaux en hauteur lors de conditions dangereuses.",
-                        "controles": "Vérification météo et contrôle des accès en hauteur."
-                    }
-                ]
-            },
-            "temp_rature_lev_e": {
-                "label": "Température élevée",
-                "items": [
-                    {
-                        "risque": "Coup de chaleur",
-                        "mesures": "Prévoir hydratation, pauses et adaptation des horaires.",
-                        "controles": "Contrôle disponibilité eau potable et pauses."
-                    }
-                ]
-            },
-            "exposition_soleil": {
-                "label": "Exposition soleil",
-                "items": [
-                    {
-                        "risque": "Insolation",
-                        "mesures": "Mettre à disposition des zones ombragées et protections solaires.",
-                        "controles": "Contrôle des équipements de protection et zones de repos."
-                    }
-                ]
-            },
-            "temp_rature_n_gative": {
-                "label": "Température négative",
-                "items": [
-                    {
-                        "risque": "Verglas",
-                        "mesures": "Déneiger et saler les accès chantier.",
-                        "controles": "Contrôle de l’état des accès et traitement des surfaces."
-                    }
-                ]
-            },
-            "gel": {
-                "label": "Gel",
-                "items": [
-                    {
-                        "risque": "Instabilité matériel",
-                        "mesures": "Vérifier les équipements avant utilisation par mauvais temps.",
-                        "controles": "Inspection du matériel et des ancrages."
-                    }
-                ]
-            },
-            "neige": {
-                "label": "Neige",
-                "items": [
-                    {
-                        "risque": "Mauvaise circulation",
-                        "mesures": "Adapter les déplacements et réduire les vitesses sur chantier.",
-                        "controles": "Contrôle circulation interne et signalisation."
-                    }
-                ]
-            },
-            "brouillard": {
-                "label": "Brouillard",
-                "items": [
-                    {
-                        "risque": "Visibilité réduite",
-                        "mesures": "Renforcer l’éclairage et la signalisation chantier.",
-                        "controles": "Vérification de la visibilité des zones de travail."
-                    }
-                ]
-            },
-            "orage": {
-                "label": "Orage",
-                "items": [
-                    {
-                        "risque": "Foudre",
-                        "mesures": "Arrêter les travaux extérieurs en cas d’orage.",
-                        "controles": "Contrôle météo et application des procédures d’arrêt."
-                    }
-                ]
-            },
-            "orage_pr_s_grues": {
-                "label": "Orage près grues",
-                "items": [
-                    {
-                        "risque": "Impact foudre",
-                        "mesures": "Mettre hors service les équipements sensibles pendant l’orage.",
-                        "controles": "Vérification arrêt des équipements et sécurisation chantier."
-                    }
-                ]
-            },
-            "chaleur_excessive": {
-                "label": "Chaleur excessive",
-                "items": [
-                    {
-                        "risque": "Fatigue",
-                        "mesures": "Organiser une rotation du personnel et des pauses régulières.",
-                        "controles": "Contrôle temps de travail et état du personnel."
-                    }
-                ]
-            },
-            "froid_intense": {
-                "label": "Froid intense",
-                "items": [
-                    {
-                        "risque": "Hypothermie",
-                        "mesures": "Fournir des vêtements adaptés et limiter le temps d’exposition.",
-                        "controles": "Vérification des EPI et pauses en zone chauffée."
-                    }
-                ]
-            },
-            "humidit_importante": {
-                "label": "Humidité importante",
-                "items": [
-                    {
-                        "risque": "Risque électrique",
-                        "mesures": "Contrôler les installations électriques exposées à l’humidité.",
-                        "controles": "Vérification des coffrets et protections différentielles."
-                    }
-                ]
-            },
-            "vent_sur_chafaudage": {
-                "label": "Vent sur échafaudage",
-                "items": [
-                    {
-                        "risque": "Instabilité structure",
-                        "mesures": "Contrôler les ancrages et structures exposées au vent.",
-                        "controles": "Inspection des échafaudages et équipements extérieurs."
-                    }
-                ]
-            },
-            "intemp_ries_g_n_rales": {
-                "label": "Intempéries générales",
-                "items": [
-                    {
-                        "risque": "Retard chantier",
-                        "mesures": "Adapter le planning selon les conditions météo.",
-                        "controles": "Suivi météo quotidien et mise à jour planning."
-                    }
-                ]
-            },
-            "poussi_res_par_temps_sec": {
-                "label": "Poussières par temps sec",
-                "items": [
-                    {
-                        "risque": "Inhalation",
-                        "mesures": "Limiter les poussières par arrosage et ventilation adaptée.",
-                        "controles": "Contrôle arrosage chantier et port des protections respiratoires."
-                    }
-                ]
-            },
-            "uv_prolong_s": {
-                "label": "UV prolongés",
-                "items": [
-                    {
-                        "risque": "Atteinte peau/yeux",
-                        "mesures": "Prévoir des protections solaires et lunettes adaptées.",
-                        "controles": "Contrôle du port des EPI et disponibilité protections."
-                    }
-                ]
-            },
-            "conditions_m_t_o_variables": {
-                "label": "Conditions météo variables",
-                "items": [
-                    {
-                        "risque": "Mauvaise anticipation",
-                        "mesures": "Assurer un suivi météo quotidien avant démarrage des travaux.",
-                        "controles": "Vérification des bulletins météo et diffusion des consignes."
-                    }
-                ]
-            }
-        }
-    },
-    "coactivit": {
-        "label": "Coactivité",
-        "sources": {
-            "travaux_simultan_s_plusieurs_entreprises": {
-                "label": "Travaux simultanés plusieurs entreprises",
-                "items": [
-                    {
-                        "risque": "Interférence activités",
-                        "mesures": "Organiser les interventions par zones et coordonner les entreprises.",
-                        "controles": "Réunions de coordination SPS et suivi planning."
-                    }
-                ]
-            },
-            "travaux_en_hauteur_au_dessus_d_autres_quipes": {
-                "label": "Travaux en hauteur au-dessus d’autres équipes",
-                "items": [
-                    {
-                        "risque": "Chute d’objets",
-                        "mesures": "Installer des protections collectives et baliser les zones exposées.",
-                        "controles": "Contrôle filets, plinthes et zones interdites."
-                    }
-                ]
-            },
-            "circulation_engins_et_pi_tons": {
-                "label": "Circulation engins et piétons",
-                "items": [
-                    {
-                        "risque": "Collision",
-                        "mesures": "Définir un plan de circulation commun à toutes les entreprises.",
-                        "controles": "Vérification du balisage et des circulations."
-                    }
-                ]
-            },
-            "travaux_lectriques_proches_autres_corps_m_tier": {
-                "label": "Travaux électriques proches autres corps métier",
-                "items": [
-                    {
-                        "risque": "Contact accidentel",
-                        "mesures": "Délimiter les zones dangereuses et contrôler les accès.",
-                        "controles": "Contrôle des barrières et signalisation."
-                    }
-                ]
-            },
-            "utilisation_simultan_e_grues_et_nacelles": {
-                "label": "Utilisation simultanée grues et nacelles",
-                "items": [
-                    {
-                        "risque": "Collision équipements",
-                        "mesures": "Organiser les manœuvres et définir les zones d’évolution.",
-                        "controles": "Contrôle des zones engins et communication équipes."
-                    }
-                ]
-            },
-            "partage_acc_s_chantier": {
-                "label": "Partage accès chantier",
-                "items": [
-                    {
-                        "risque": "Encombrement",
-                        "mesures": "Maintenir les circulations dégagées et organiser le stockage.",
-                        "controles": "Inspection quotidienne du rangement chantier."
-                    }
-                ]
-            },
-            "superposition_travaux": {
-                "label": "Superposition travaux",
-                "items": [
-                    {
-                        "risque": "Chute matériaux",
-                        "mesures": "Sécuriser les stockages et interdire les passages sous charges.",
-                        "controles": "Contrôle stabilité stockage et balisage."
-                    }
-                ]
-            },
-            "utilisation_produits_dangereux": {
-                "label": "Utilisation produits dangereux",
-                "items": [
-                    {
-                        "risque": "Exposition tiers",
-                        "mesures": "Informer les entreprises présentes des risques spécifiques.",
-                        "controles": "Vérification des accueils sécurité et briefings."
-                    }
-                ]
-            },
-            "travaux_bruyants_simultan_s": {
-                "label": "Travaux bruyants simultanés",
-                "items": [
-                    {
-                        "risque": "Mauvaise communication",
-                        "mesures": "Mettre en place des moyens de communication adaptés.",
-                        "controles": "Contrôle radios, consignes et coordination terrain."
-                    }
-                ]
-            },
-            "intervention_maintenance_pendant_travaux": {
-                "label": "Intervention maintenance pendant travaux",
-                "items": [
-                    {
-                        "risque": "Démarrage intempestif",
-                        "mesures": "Appliquer les procédures de consignation des équipements.",
-                        "controles": "Vérification des consignations et verrouillages."
-                    }
-                ]
-            },
-            "travaux_soudure_proches_mat_riaux_inflammables": {
-                "label": "Travaux soudure proches matériaux inflammables",
-                "items": [
-                    {
-                        "risque": "Incendie",
-                        "mesures": "Organiser les permis feu et sécuriser les zones de travaux à chaud.",
-                        "controles": "Contrôle extincteurs et permis feu."
-                    }
-                ]
-            },
-            "pr_sence_entreprises_ext_rieures": {
-                "label": "Présence entreprises extérieures",
-                "items": [
-                    {
-                        "risque": "Méconnaissance site",
-                        "mesures": "Réaliser un accueil sécurité obligatoire avant intervention.",
-                        "controles": "Vérification des attestations d’accueil sécurité."
-                    }
-                ]
-            },
-            "travaux_en_espace_r_duit": {
-                "label": "Travaux en espace réduit",
-                "items": [
-                    {
-                        "risque": "Gêne circulation",
-                        "mesures": "Définir des cheminements sécurisés et séparés.",
-                        "controles": "Contrôle circulation et accès chantier."
-                    }
-                ]
-            },
-            "utilisation_simultan_e_engins": {
-                "label": "Utilisation simultanée engins",
-                "items": [
-                    {
-                        "risque": "Heurt engins",
-                        "mesures": "Prévoir un aide-manœuvre pour les déplacements d’engins.",
-                        "controles": "Vérification présence signaleur et alarmes recul."
-                    }
-                ]
-            },
-            "vacuation_d_chets_chantier": {
-                "label": "Évacuation déchets chantier",
-                "items": [
-                    {
-                        "risque": "Obstruction voies",
-                        "mesures": "Maintenir libres les accès et voies d’évacuation.",
-                        "controles": "Inspection des issues secours et circulations."
-                    }
-                ]
-            },
-            "travaux_de_nuit_et_jour_simultan_s": {
-                "label": "Travaux de nuit et jour simultanés",
-                "items": [
-                    {
-                        "risque": "Mauvaise visibilité",
-                        "mesures": "Installer un éclairage renforcé dans les zones communes.",
-                        "controles": "Contrôle éclairage chantier et visibilité balisage."
-                    }
-                ]
-            },
-            "coactivit_avec_voirie_publique": {
-                "label": "Coactivité avec voirie publique",
-                "items": [
-                    {
-                        "risque": "Collision usagers",
-                        "mesures": "Renforcer la signalisation et organiser les flux de circulation.",
-                        "controles": "Contrôle signalisation et circulation interne."
-                    }
-                ]
-            },
-            "intervention_sous_charge_suspendue": {
-                "label": "Intervention sous charge suspendue",
-                "items": [
-                    {
-                        "risque": "Écrasement",
-                        "mesures": "Délimiter les zones de manœuvre et interdire les accès.",
-                        "controles": "Contrôle balisage et respect zones interdites."
-                    }
-                ]
-            },
-            "utilisation_chafaudage_partag": {
-                "label": "Utilisation échafaudage partagé",
-                "items": [
-                    {
-                        "risque": "Surcharge / chute",
-                        "mesures": "Respecter les charges admissibles des plateformes et équipements.",
-                        "controles": "Vérification des charges et stabilité équipements."
-                    }
-                ]
-            },
-            "modification_installation_provisoire": {
-                "label": "Modification installation provisoire",
-                "items": [
-                    {
-                        "risque": "Risque électrique",
-                        "mesures": "Consigner les installations avant toute intervention commune.",
-                        "controles": "Contrôle consignation et habilitations électriques."
-                    }
-                ]
-            }
-        }
-    },
-    "manutention_mat_riel_produit": {
-        "label": "Manutention matériel & produit",
-        "sources": {
-            "utilisation_mat_riel_sans_autorisation": {
-                "label": "Utilisation matériel sans autorisation",
-                "items": [
-                    {
-                        "risque": "Mauvaise manipulation",
-                        "mesures": "Former le personnel aux gestes et postures adaptés.",
-                        "controles": "Contrôle des formations et observation terrain."
-                    }
-                ]
-            },
-            "conduite_engin_sans_formation": {
-                "label": "Conduite engin sans formation",
-                "items": [
-                    {
-                        "risque": "Perte contrôle engin",
-                        "mesures": "Utiliser des engins adaptés et conducteurs habilités.",
-                        "controles": "Vérification autorisations et état des engins."
-                    }
-                ]
-            },
-            "utilisation_machine_non_conforme": {
-                "label": "Utilisation machine non conforme",
-                "items": [
-                    {
-                        "risque": "Défaillance technique",
-                        "mesures": "Réaliser des contrôles périodiques des équipements.",
-                        "controles": "Vérification maintenance et contrôles réglementaires."
-                    }
-                ]
-            },
-            "utilisation_mat_riel_d_fectueux": {
-                "label": "Utilisation matériel défectueux",
-                "items": [
-                    {
-                        "risque": "Panne ou rupture",
-                        "mesures": "Contrôler le matériel avant chaque utilisation.",
-                        "controles": "Inspection visuelle avant démarrage."
-                    }
-                ]
-            },
-            "emploi_mat_riel_sans_notice": {
-                "label": "Emploi matériel sans notice",
-                "items": [
-                    {
-                        "risque": "Mauvaise utilisation",
-                        "mesures": "Respecter les notices et consignes d’utilisation.",
-                        "controles": "Contrôle des pratiques et affichage consignes."
-                    }
-                ]
-            },
-            "pr_t_mat_riel_entre_entreprises": {
-                "label": "Prêt matériel entre entreprises",
-                "items": [
-                    {
-                        "risque": "Méconnaissance fonctionnement",
-                        "mesures": "Former les opérateurs aux équipements utilisés.",
-                        "controles": "Vérification habilitations et formations."
-                    }
-                ]
-            },
-            "utilisation_appareil_levage_sans_vgp": {
-                "label": "Utilisation appareil levage sans VGP",
-                "items": [
-                    {
-                        "risque": "Rupture charge",
-                        "mesures": "Utiliser des accessoires de levage conformes.",
-                        "controles": "Contrôle des élingues et accessoires."
-                    }
-                ]
-            },
-            "utilisation_outillage_lectrique": {
-                "label": "Utilisation outillage électrique",
-                "items": [
-                    {
-                        "risque": "Défaut isolation",
-                        "mesures": "Vérifier l’état des équipements électriques.",
-                        "controles": "Inspection des câbles et protections électriques."
-                    }
-                ]
-            },
-            "utilisation_nacelle_sans_autorisation": {
-                "label": "Utilisation nacelle sans autorisation",
-                "items": [
-                    {
-                        "risque": "Chute hauteur",
-                        "mesures": "Installer protections collectives et équipements antichute.",
-                        "controles": "Contrôle garde-corps et harnais."
-                    }
-                ]
-            },
-            "utilisation_disqueuse_sans_protection": {
-                "label": "Utilisation disqueuse sans protection",
-                "items": [
-                    {
-                        "risque": "Projection fragments",
-                        "mesures": "Utiliser des carters et EPI adaptés.",
-                        "controles": "Contrôle protections outils et EPI."
-                    }
-                ]
-            },
-            "maintenance_non_autoris_e": {
-                "label": "Maintenance non autorisée",
-                "items": [
-                    {
-                        "risque": "Démarrage intempestif",
-                        "mesures": "Appliquer les procédures de consignation.",
-                        "controles": "Vérification verrouillage équipements."
-                    }
-                ]
-            },
-            "utilisation_produit_chimique_sans_validation": {
-                "label": "Utilisation produit chimique sans validation",
-                "items": [
-                    {
-                        "risque": "Exposition dangereuse",
-                        "mesures": "Limiter l’exposition et prévoir les EPI adaptés.",
-                        "controles": "Contrôle port EPI et conditions de travail."
-                    }
-                ]
-            },
-            "modification_mat_riel_chantier": {
-                "label": "Modification matériel chantier",
-                "items": [
-                    {
-                        "risque": "Suppression sécurité",
-                        "mesures": "Interdire toute neutralisation des dispositifs de sécurité.",
-                        "controles": "Vérification dispositifs de sécurité."
-                    }
-                ]
-            },
-            "utilisation_mat_riel_par_personnel_externe": {
-                "label": "Utilisation matériel par personnel externe",
-                "items": [
-                    {
-                        "risque": "Méconnaissance risques",
-                        "mesures": "Réaliser des briefings sécurité réguliers.",
-                        "controles": "Contrôle des causeries sécurité."
-                    }
-                ]
-            },
-            "travail_simultan_avec_plusieurs_mat_riels": {
-                "label": "Travail simultané avec plusieurs matériels",
-                "items": [
-                    {
-                        "risque": "Interférence engins",
-                        "mesures": "Organiser un plan de circulation chantier.",
-                        "controles": "Vérification des flux engins/piétons."
-                    }
-                ]
-            },
-            "utilisation_mat_riel_en_mauvais_tat": {
-                "label": "Utilisation matériel en mauvais état",
-                "items": [
-                    {
-                        "risque": "Rupture composant",
-                        "mesures": "Vérifier périodiquement les composants sensibles.",
-                        "controles": "Contrôle maintenance et usure pièces."
-                    }
-                ]
-            },
-            "utilisation_quipements_sous_intemp_ries": {
-                "label": "Utilisation équipements sous intempéries",
-                "items": [
-                    {
-                        "risque": "Instabilité matériel",
-                        "mesures": "Stabiliser les équipements avant utilisation.",
-                        "controles": "Inspection des appuis et stabilisateurs."
-                    }
-                ]
-            },
-            "absence_contr_le_journalier": {
-                "label": "Absence contrôle journalier",
-                "items": [
-                    {
-                        "risque": "Défaut non détecté",
-                        "mesures": "Réaliser des check-lists avant démarrage.",
-                        "controles": "Vérification check-lists remplies."
-                    }
-                ]
-            },
-            "utilisation_mat_riel_non_adapt": {
-                "label": "Utilisation matériel non adapté",
-                "items": [
-                    {
-                        "risque": "Surcharge / mauvaise utilisation",
-                        "mesures": "Respecter les capacités maximales des équipements.",
-                        "controles": "Contrôle charges admissibles."
-                    }
-                ]
-            },
-            "personnel_non_inform": {
-                "label": "Personnel non informé",
-                "items": [
-                    {
-                        "risque": "Mauvaise réaction",
-                        "mesures": "Former les équipes aux procédures d’urgence.",
-                        "controles": "Vérification exercices et consignes sécurité."
-                    }
-                ]
-            }
-        }
-    },
-    "techniques_hvac_sanitaires": {
-        "label": "Techniques HVAC-Sanitaires",
-        "sources": {
-            "installation_gaines_hvac": {
-                "label": "Installation gaines HVAC",
-                "items": [
-                    {
-                        "risque": "Travail en hauteur",
-                        "mesures": "Installer des échafaudages conformes et protections antichute.",
-                        "controles": "Contrôle échafaudages et harnais."
-                    }
-                ]
-            },
-            "pose_conduites_sanitaires": {
-                "label": "Pose conduites sanitaires",
-                "items": [
-                    {
-                        "risque": "Manutention charges",
-                        "mesures": "Utiliser des aides mécaniques de levage.",
-                        "controles": "Vérification des moyens de manutention."
-                    }
-                ]
-            },
-            "travaux_de_soudage_tuyauterie": {
-                "label": "Travaux de soudage tuyauterie",
-                "items": [
-                    {
-                        "risque": "Brûlure / incendie",
-                        "mesures": "Mettre en place un permis feu et extincteurs adaptés.",
-                        "controles": "Contrôle extincteurs et permis feu."
-                    }
-                ]
-            },
-            "utilisation_outils_lectroportatifs": {
-                "label": "Utilisation outils électroportatifs",
-                "items": [
-                    {
-                        "risque": "Coupure / projection",
-                        "mesures": "Utiliser des outils avec protections adaptées.",
-                        "controles": "Contrôle carters et EPI."
-                    }
-                ]
-            },
-            "raccordement_quipements_hvac": {
-                "label": "Raccordement équipements HVAC",
-                "items": [
-                    {
-                        "risque": "Risque électrique",
-                        "mesures": "Consigner les installations avant intervention.",
-                        "controles": "Vérification absence tension et consignation."
-                    }
-                ]
-            },
-            "mise_sous_pression_r_seaux": {
-                "label": "Mise sous pression réseaux",
-                "items": [
-                    {
-                        "risque": "Éclatement canalisation",
-                        "mesures": "Contrôler la pression avant mise en service.",
-                        "controles": "Vérification essais et raccordements."
-                    }
-                ]
-            },
-            "travaux_en_locaux_techniques": {
-                "label": "Travaux en locaux techniques",
-                "items": [
-                    {
-                        "risque": "Atmosphère confinée",
-                        "mesures": "Assurer ventilation et contrôle atmosphérique.",
-                        "controles": "Contrôle ventilation et détecteurs gaz."
-                    }
-                ]
-            },
-            "utilisation_produits_chimiques": {
-                "label": "Utilisation produits chimiques",
-                "items": [
-                    {
-                        "risque": "Inhalation / contact",
-                        "mesures": "Utiliser les EPI adaptés et consulter les FDS.",
-                        "controles": "Contrôle port EPI et disponibilité FDS."
-                    }
-                ]
-            },
-            "installation_groupes_ventilation": {
-                "label": "Installation groupes ventilation",
-                "items": [
-                    {
-                        "risque": "Levage matériel lourd",
-                        "mesures": "Employer des moyens de levage adaptés.",
-                        "controles": "Contrôle accessoires et capacité levage."
-                    }
-                ]
-            },
-            "d_coupe_tuyauteries": {
-                "label": "Découpe tuyauteries",
-                "items": [
-                    {
-                        "risque": "Projection particules",
-                        "mesures": "Porter lunettes et écrans de protection.",
-                        "controles": "Vérification EPI et protections collectives."
-                    }
-                ]
-            },
-            "travaux_faux_plafonds": {
-                "label": "Travaux faux plafonds",
-                "items": [
-                    {
-                        "risque": "Chute hauteur",
-                        "mesures": "Installer garde-corps et lignes de vie.",
-                        "controles": "Contrôle protections antichute."
-                    }
-                ]
-            },
-            "isolation_thermique": {
-                "label": "Isolation thermique",
-                "items": [
-                    {
-                        "risque": "Contact fibres",
-                        "mesures": "Limiter l’exposition et utiliser protections respiratoires.",
-                        "controles": "Contrôle port masques et confinement zones."
-                    }
-                ]
-            },
-            "mise_en_service_hvac": {
-                "label": "Mise en service HVAC",
-                "items": [
-                    {
-                        "risque": "Bruit équipements",
-                        "mesures": "Fournir des protections auditives adaptées.",
-                        "controles": "Contrôle exposition bruit et port EPI."
-                    }
-                ]
-            },
-            "utilisation_gaz_r_frig_rant": {
-                "label": "Utilisation gaz réfrigérant",
-                "items": [
-                    {
-                        "risque": "Fuite gaz",
-                        "mesures": "Contrôler l’étanchéité des installations.",
-                        "controles": "Vérification détecteurs et essais étanchéité."
-                    }
-                ]
-            },
-            "intervention_sur_chaudi_re": {
-                "label": "Intervention sur chaudière",
-                "items": [
-                    {
-                        "risque": "Brûlure",
-                        "mesures": "Porter des gants et protections thermiques.",
-                        "controles": "Contrôle EPI et procédures travail chaud."
-                    }
-                ]
-            },
-            "travaux_sanitaires": {
-                "label": "Travaux sanitaires",
-                "items": [
-                    {
-                        "risque": "Contact eaux usées",
-                        "mesures": "Renforcer les règles d’hygiène et protections adaptées.",
-                        "controles": "Contrôle nettoyage et désinfection."
-                    }
-                ]
-            },
-            "travail_en_coactivit": {
-                "label": "Travail en coactivité",
-                "items": [
-                    {
-                        "risque": "Collision / interférence",
-                        "mesures": "Organiser les interventions avec coordination chantier.",
-                        "controles": "Réunions coordination et suivi planning."
-                    }
-                ]
-            },
-            "utilisation_chelle": {
-                "label": "Utilisation échelle",
-                "items": [
-                    {
-                        "risque": "Chute",
-                        "mesures": "Maintenir les accès propres et sécurisés.",
-                        "controles": "Contrôle rangement et éclairage."
-                    }
-                ]
-            },
-            "stockage_mat_riel_hvac": {
-                "label": "Stockage matériel HVAC",
-                "items": [
-                    {
-                        "risque": "Chute matériel",
-                        "mesures": "Sécuriser les outils et matériaux en hauteur.",
-                        "controles": "Vérification filets et attaches-outils."
-                    }
-                ]
-            },
-            "travaux_en_toiture_hvac": {
-                "label": "Travaux en toiture HVAC",
-                "items": [
-                    {
-                        "risque": "Conditions météo",
-                        "mesures": "Suspendre les travaux extérieurs en cas d’intempéries.",
-                        "controles": "Contrôle météo quotidien."
-                    }
-                ]
-            }
-        }
-    },
-    "imp_trants": {
-        "label": "Impétrants",
-        "sources": {
-            "terrassement_proximit_c_bles_lectriques": {
-                "label": "Terrassement à proximité câbles électriques",
-                "items": [
-                    {
-                        "risque": "Contact réseau électrique",
-                        "mesures": "Réaliser les DICT et respecter les distances de sécurité.",
-                        "controles": "Vérification plans réseaux et balisage."
-                    }
-                ]
-            },
-            "excavation_proche_conduite_gaz": {
-                "label": "Excavation proche conduite gaz",
-                "items": [
-                    {
-                        "risque": "Percement conduite",
-                        "mesures": "Localiser précisément les réseaux avant travaux.",
-                        "controles": "Contrôle détection réseaux et marquage."
-                    }
-                ]
-            },
-            "travaux_proches_conduite_eau": {
-                "label": "Travaux proches conduite eau",
-                "items": [
-                    {
-                        "risque": "Rupture canalisation",
-                        "mesures": "Effectuer les travaux sensibles manuellement à proximité réseaux.",
-                        "controles": "Vérification méthodes de terrassement."
-                    }
-                ]
-            },
-            "travaux_pr_s_fibre_t_l_com": {
-                "label": "Travaux près fibre/télécom",
-                "items": [
-                    {
-                        "risque": "Coupure réseau",
-                        "mesures": "Prévoir une coordination avec les gestionnaires réseaux.",
-                        "controles": "Contrôle autorisations et consignations."
-                    }
-                ]
-            },
-            "utilisation_pelle_m_canique": {
-                "label": "Utilisation pelle mécanique",
-                "items": [
-                    {
-                        "risque": "Arrachement réseau",
-                        "mesures": "Respecter les distances de sécurité des engins.",
-                        "controles": "Contrôle circulation engins à proximité réseaux."
-                    }
-                ]
-            },
-            "travaux_sous_lignes_a_riennes": {
-                "label": "Travaux sous lignes aériennes",
-                "items": [
-                    {
-                        "risque": "Arc électrique",
-                        "mesures": "Utiliser du matériel adapté et personnel habilité.",
-                        "controles": "Vérification habilitations et EPI électriques."
-                    }
-                ]
-            },
-            "fouille_sans_plan_r_seau": {
-                "label": "Fouille sans plan réseau",
-                "items": [
-                    {
-                        "risque": "Réseau non identifié",
-                        "mesures": "Réaliser une détection préalable avant excavation.",
-                        "controles": "Contrôle DICT et plans mis à jour."
-                    }
-                ]
-            },
-            "utilisation_engins_levage": {
-                "label": "Utilisation engins levage",
-                "items": [
-                    {
-                        "risque": "Contact ligne aérienne",
-                        "mesures": "Respecter les distances minimales de sécurité.",
-                        "controles": "Contrôle hauteur engins et balisage."
-                    }
-                ]
-            },
-            "travaux_de_forage": {
-                "label": "Travaux de forage",
-                "items": [
-                    {
-                        "risque": "Percement conduite enterrée",
-                        "mesures": "Travailler manuellement à proximité immédiate des réseaux.",
-                        "controles": "Vérification fouilles manuelles."
-                    }
-                ]
-            },
-            "r_seau_gaz_endommag": {
-                "label": "Réseau gaz endommagé",
-                "items": [
-                    {
-                        "risque": "Fuite gaz",
-                        "mesures": "Prévoir une procédure d’urgence et ventilation adaptée.",
-                        "controles": "Contrôle détecteurs gaz et consignes sécurité."
-                    }
-                ]
-            },
-            "r_seau_lectrique_endommag": {
-                "label": "Réseau électrique endommagé",
-                "items": [
-                    {
-                        "risque": "Court-circuit",
-                        "mesures": "Consigner les installations avant intervention.",
-                        "controles": "Vérification consignation et absence tension."
-                    }
-                ]
-            },
-            "travail_manuel_en_fouille": {
-                "label": "Travail manuel en fouille",
-                "items": [
-                    {
-                        "risque": "Contact accidentel réseau",
-                        "mesures": "Baliser les zones sensibles et limiter les accès.",
-                        "controles": "Contrôle signalisation et zones interdites."
-                    }
-                ]
-            },
-            "conditions_m_t_o_d_favorables": {
-                "label": "Conditions météo défavorables",
-                "items": [
-                    {
-                        "risque": "Mauvaise visibilité réseaux",
-                        "mesures": "Marquer clairement les réseaux au sol avant travaux.",
-                        "controles": "Vérification du marquage et plans disponibles."
-                    }
-                ]
-            },
-            "coactivit_avec_concessionnaires": {
-                "label": "Coactivité avec concessionnaires",
-                "items": [
-                    {
-                        "risque": "Mauvaise coordination",
-                        "mesures": "Organiser une réunion préalable avec les intervenants.",
-                        "controles": "Contrôle coordination et diffusion consignes."
-                    }
-                ]
-            },
-            "signalisation_r_seau_insuffisante": {
-                "label": "Signalisation réseau insuffisante",
-                "items": [
-                    {
-                        "risque": "Erreur excavation",
-                        "mesures": "Utiliser les plans actualisés et méthodes adaptées.",
-                        "controles": "Vérification procédures terrassement."
-                    }
-                ]
-            },
-            "travaux_proximit_gouttage": {
-                "label": "Travaux à proximité égouttage",
-                "items": [
-                    {
-                        "risque": "Atmosphère dangereuse",
-                        "mesures": "Contrôler l’atmosphère avant intervention en fouille.",
-                        "controles": "Vérification détecteurs gaz et ventilation."
-                    }
-                ]
-            },
-            "utilisation_marteau_piqueur": {
-                "label": "Utilisation marteau-piqueur",
-                "items": [
-                    {
-                        "risque": "Rupture conduite",
-                        "mesures": "Prévoir un arrêt immédiat des travaux en cas d’incident.",
-                        "controles": "Contrôle application procédure urgence."
-                    }
-                ]
-            },
-            "travaux_voirie": {
-                "label": "Travaux voirie",
-                "items": [
-                    {
-                        "risque": "Circulation proche impétrants",
-                        "mesures": "Délimiter les zones d’évolution des engins.",
-                        "controles": "Contrôle circulation et balisage chantier."
-                    }
-                ]
-            },
-            "intervention_urgence_r_seau": {
-                "label": "Intervention urgence réseau",
-                "items": [
-                    {
-                        "risque": "Stress / précipitation",
-                        "mesures": "Planifier les travaux et limiter les interventions en urgence.",
-                        "controles": "Contrôle organisation chantier et briefing sécurité."
-                    }
-                ]
-            },
-            "r_seau_inconnu_d_couvert": {
-                "label": "Réseau inconnu découvert",
-                "items": [
-                    {
-                        "risque": "Réaction inadaptée",
-                        "mesures": "Former les équipes aux procédures d’urgence et d’évacuation.",
-                        "controles": "Vérification exercices sécurité et consignes affichées."
-                    }
-                ]
-            }
-        }
-    }
-};
+        };
 
-        const mainSelect = document.getElementById('main-activity');
-        const sourceSelect = document.getElementById('source-activity');
+        // Tableaux pour stocker les sélections actives (Multi-choix)
+        let selectedMainActivities = [];
+        let selectedSourceActivities = [];
+
+        const mainContainer = document.getElementById('main-badges-container');
+        const sourceContainer = document.getElementById('source-badges-container');
         const emptyState = document.getElementById('empty-state');
         const resultsSection = document.getElementById('results-section');
         const tableBody = document.getElementById('table-body');
-        const reportTitle = document.getElementById('report-title');
+        const btnReset = document.getElementById('btn-reset');
 
-        // Initialisation automatique des options du premier sélecteur
-        function initOptions() {
+        // Génère les boutons (badges) d'activités principales au démarrage
+        function initMainBadges() {
+            mainContainer.innerHTML = '';
             for (const key in database) {
-                const option = document.createElement('option');
-                option.value = key;
-                option.textContent = database[key].label;
-                mainSelect.appendChild(option);
+                const btn = document.createElement('button');
+                btn.type = "button";
+                btn.textContent = database[key].label;
+                btn.className = "px-3 py-1.5 rounded-full text-xs font-medium border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 transition-all cursor-pointer";
+                
+                btn.onclick = () => toggleMainActivity(key, btn);
+                mainContainer.appendChild(btn);
             }
         }
 
-        // Gestionnaire d'Événement 1 : Mise à jour en cascade du second menu déroulant
-        mainSelect.addEventListener('change', function() {
-            const mainKey = this.value;
-
-            sourceSelect.innerHTML = '<option value="">-- Choisir une activité source --</option>';
-            sourceSelect.disabled = true;
-            sourceSelect.className = "block w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2.5 text-sm shadow-sm focus:outline-none cursor-not-allowed";
-            
-            resultsSection.classList.add('hidden');
-            emptyState.classList.remove('hidden');
-
-            if (!mainKey || !database[mainKey]) return;
-
-            const sources = database[mainKey].sources;
-            for (const key in sources) {
-                const option = document.createElement('option');
-                option.value = key;
-                option.textContent = sources[key].label;
-                sourceSelect.appendChild(option);
+        // Gère l'activation / désactivation d'une activité générale
+        function toggleMainActivity(key, element) {
+            if (selectedMainActivities.includes(key)) {
+                selectedMainActivities = selectedMainActivities.filter(item => item !== key);
+                element.className = "px-3 py-1.5 rounded-full text-xs font-medium border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 transition-all cursor-pointer";
+            } else {
+                selectedMainActivities.push(key);
+                element.className = "px-3 py-1.5 rounded-full text-xs font-medium border border-indigo-600 bg-indigo-600 text-white shadow-sm transition-all cursor-pointer";
             }
+            
+            // Nettoyer les sources qui n'appartiennent plus aux activités sélectionnées
+            selectedSourceActivities = selectedSourceActivities.filter(srcKey => {
+                return selectedMainActivities.some(mKey => database[mKey].sources[srcKey]);
+            });
 
-            sourceSelect.disabled = false;
-            sourceSelect.className = "block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none cursor-pointer transition-all";
-        });
+            updateSourceBadges();
+            renderTable();
+        }
 
-        // Gestionnaire d'Événement 2 : Rendu instantané du tableau à 5 colonnes
-        sourceSelect.addEventListener('change', function() {
-            const mainKey = mainSelect.value;
-            const sourceKey = this.value;
-
-            if (!mainKey || !sourceKey || !database[mainKey].sources[sourceKey]) {
-                resultsSection.classList.add('hidden');
-                emptyState.classList.remove('hidden');
+        // Génère ou met à jour les badges d'activités sources d'après la sélection parente
+        function updateSourceBadges() {
+            if (selectedMainActivities.length === 0) {
+                sourceContainer.innerHTML = '<span class="text-xs text-slate-400 italic">Sélectionnez au moins une activité générale pour voir ses sources.</span>';
                 return;
             }
 
-            const mainLabel = database[mainKey].label;
-            const sourceData = database[mainKey].sources[sourceKey];
-            
-            // Mise à jour textuelle du titre du rapport
-            reportTitle.textContent = `Analyse réglementaire : ${mainLabel} ➔ ${sourceData.label}`;
-            tableBody.innerHTML = '';
+            sourceContainer.innerHTML = '';
+            selectedMainActivities.forEach(mainKey => {
+                const sources = database[mainKey].sources;
+                for (const srcKey in sources) {
+                    const isSelected = selectedSourceActivities.includes(srcKey);
+                    const btn = document.createElement('button');
+                    btn.type = "button";
+                    btn.textContent = `${sources[srcKey].label} (${database[mainKey].label})`;
+                    
+                    if (isSelected) {
+                        btn.className = "px-3 py-1.5 rounded-full text-xs font-medium border border-emerald-600 bg-emerald-600 text-white shadow-sm transition-all cursor-pointer";
+                    } else {
+                        btn.className = "px-3 py-1.5 rounded-full text-xs font-medium border border-slate-300 bg-slate-50 text-slate-600 hover:bg-slate-100 transition-all cursor-pointer";
+                    }
 
-            // Injection dynamique des lignes
-            sourceData.items.forEach(item => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50 transition-colors divide-x divide-slate-200 odd:bg-slate-50/30";
-                
-                tr.innerHTML = `
-                    <td class="p-3 font-semibold text-slate-900 bg-slate-50/50">${mainLabel}</td>
-                    <td class="p-3 font-medium text-indigo-950">${sourceData.label}</td>
-                    <td class="p-3 text-amber-950 font-medium bg-amber-50/10">⚠️ ${item.risque}</td>
-                    <td class="p-3 text-slate-600 leading-relaxed">${item.mesures}</td>
-                    <td class="p-3 text-slate-600 leading-relaxed bg-slate-50/20 font-medium border-l">📋 ${item.controles}</td>
-                `;
-                tableBody.appendChild(tr);
+                    btn.onclick = () => toggleSourceActivity(srcKey, btn);
+                    sourceContainer.appendChild(btn);
+                }
+            });
+        }
+
+        // Gère l'activation / désactivation d'une activité source
+        function toggleSourceActivity(srcKey, element) {
+            if (selectedSourceActivities.includes(srcKey)) {
+                selectedSourceActivities = selectedSourceActivities.filter(item => item !== srcKey);
+                element.className = "px-3 py-1.5 rounded-full text-xs font-medium border border-slate-300 bg-slate-50 text-slate-600 hover:bg-slate-100 transition-all cursor-pointer";
+            } else {
+                selectedSourceActivities.push(srcKey);
+                element.className = "px-3 py-1.5 rounded-full text-xs font-medium border border-emerald-600 bg-emerald-600 text-white shadow-sm transition-all cursor-pointer";
+            }
+            renderTable();
+        }
+
+        // Compile et rafraîchit dynamiquement le tableau réglementaire
+        function renderTable() {
+            tableBody.innerHTML = '';
+            
+            if (selectedMainActivities.length === 0) {
+                resultsSection.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                btnReset.classList.add('hidden');
+                return;
+            }
+
+            btnReset.classList.remove('hidden');
+            let matchCount = 0;
+
+            selectedMainActivities.forEach(mainKey => {
+                const mainLabel = database[mainKey].label;
+                const sources = database[mainKey].sources;
+
+                for (const srcKey in sources) {
+                    // Si l'utilisateur a filtré des sources spécifiques, on n'affiche que celles-ci.
+                    // S'il n'a sélectionné aucune source spécifique, on affiche TOUTES les sources de l'activité par défaut.
+                    if (selectedSourceActivities.length > 0 && !selectedSourceActivities.includes(srcKey)) {
+                        continue;
+                    }
+
+                    const sourceData = sources[srcKey];
+                    sourceData.items.forEach(item => {
+                        matchCount++;
+                        const tr = document.createElement('tr');
+                        tr.className = "hover:bg-slate-50 transition-colors divide-x divide-slate-200 odd:bg-slate-50/30";
+                        tr.innerHTML = `
+                            <td class="p-3 font-semibold text-slate-900 bg-slate-50/50">${mainLabel}</td>
+                            <td class="p-3 font-medium text-indigo-950">${sourceData.label}</td>
+                            <td class="p-3 text-amber-950 font-medium bg-amber-50/10">⚠️ ${item.risque}</td>
+                            <td class="p-3 text-slate-600 leading-relaxed">${item.mesures}</td>
+                            <td class="p-3 text-slate-600 leading-relaxed bg-slate-50/20 font-medium border-l">📋 ${item.controles}</td>
+                        `;
+                        tableBody.appendChild(tr);
+                    });
+                }
             });
 
-            emptyState.classList.add('hidden');
-            resultsSection.classList.remove('hidden');
-        });
+            if (matchCount > 0) {
+                emptyState.classList.add('hidden');
+                resultsSection.classList.remove('hidden');
+            } else {
+                resultsSection.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+            }
+        }
 
-        // Lancement au chargement de la page
-        initOptions();
+        // Remise à zéro complète des filtres
+        function resetFilters() {
+            selectedMainActivities = [];
+            selectedSourceActivities = [];
+            initMainBadges();
+            updateSourceBadges();
+            renderTable();
+        }
+
+        // Lancement au chargement
+        initMainBadges();
     </script>
 </body>
 </html>
