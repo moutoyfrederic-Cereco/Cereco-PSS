@@ -3,10 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Logiciel de Génération Matrice PSS - Multi-Sélection</title>
+    <title>Logiciel Matrice PSS - Multi-Sélection Avancée</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
-        /* Optimisation pour l'impression et export PDF */
+        /* Style pour masquer les barres de défilement des menus déroulants */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        /* Impression & Export PDF */
         @media print {
             body { background-color: #ffffff !important; color: #000000 !important; }
             .no-print { display: none !important; }
@@ -25,14 +36,14 @@
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                     <h1 class="text-xl font-bold tracking-tight flex items-center gap-2">
-                        🛡️ Logiciel d'Analyse des Risques & PSS (Multi-Sélection)
+                        🛡️ Logiciel d'Analyse des Risques & PSS Multi-Filtres
                     </h1>
                     <p class="text-slate-400 text-xs mt-0.5">
-                        Sélectionnez plusieurs activités et sources simultanément pour composer votre document de sécurité.
+                        Sélectionnez vos activités pour générer instantanément les activités sources correspondantes.
                     </p>
                 </div>
-                <div class="bg-indigo-500/10 border border-indigo-400/20 px-3 py-1.5 rounded-md text-xs text-indigo-300 self-start sm:self-center">
-                    Mode : <strong>Multi-Filtres Actif</strong>
+                <div class="bg-emerald-500/10 border border-emerald-400/20 px-3 py-1.5 rounded-md text-xs text-emerald-300 self-start sm:self-center">
+                    Hébergement : <strong>GitHub Pages Actif</strong>
                 </div>
             </div>
         </div>
@@ -41,50 +52,57 @@
     <main class="flex-grow max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8 w-full print-full-width">
         
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 mb-6 no-print">
-            <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-2">
-                <h2 class="text-xs font-bold uppercase tracking-wider text-indigo-600 flex items-center gap-1.5">
-                    🎛️ Panneau de filtrage cumulatif
-                </h2>
-                <button id="btn-reset" class="text-xs text-slate-500 hover:text-red-600 font-medium transition-colors hidden" onclick="resetFilters()">
-                    ✕ Réinitialiser les filtres
-                </button>
-            </div>
+            <h2 class="text-xs font-bold uppercase tracking-wider text-indigo-600 mb-4 flex items-center gap-1.5">
+                🔍 Sélection des Activités et Sources de Risques
+            </h2>
             
-            <div class="space-y-5">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-2">
-                        1. Filtrer par Activité(s) Générale(s) :
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <div class="relative">
+                    <label class="block text-xs font-semibold text-slate-700 mb-1.5">
+                        1. Activités Générales (<span id="count-main">0</span> sélectionnée(s)) :
                     </label>
-                    <div id="main-badges-container" class="flex flex-wrap gap-2">
+                    <div class="border border-slate-300 rounded-lg bg-slate-50 p-2 max-h-48 overflow-y-auto custom-scrollbar space-y-1" id="main-dropdown">
                         </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-2">
-                        2. Filtrer par Activité(s) Source(s) associée(s) :
-                    </label>
-                    <div id="source-badges-container" class="flex flex-wrap gap-2">
-                        <span class="text-xs text-slate-400 italic">Sélectionnez au moins une activité générale pour voir ses sources.</span>
+                    <div class="flex gap-2 mt-1.5 justify-end">
+                        <button onclick="toggleAllMain(true)" class="text-[10px] text-indigo-600 hover:underline font-medium cursor-pointer">Tout cocher</button>
+                        <span class="text-[10px] text-slate-300">|</span>
+                        <button onclick="toggleAllMain(false)" class="text-[10px] text-slate-500 hover:underline font-medium cursor-pointer">Tout décocher</button>
                     </div>
                 </div>
+
+                <div class="relative">
+                    <label class="block text-xs font-semibold text-slate-700 mb-1.5">
+                        2. Activités Sources Associées (<span id="count-source">0</span> sélectionnée(s)) :
+                    </label>
+                    <div class="border border-slate-300 rounded-lg bg-slate-50 p-2 max-h-48 overflow-y-auto custom-scrollbar space-y-1" id="source-dropdown">
+                        <div class="text-xs text-slate-400 italic p-1 text-center">Veuillez cocher au moins une activité générale à gauche.</div>
+                    </div>
+                    <div class="flex gap-2 mt-1.5 justify-end" id="source-actions" style="display: none;">
+                        <button onclick="toggleAllSource(true)" class="text-[10px] text-emerald-600 hover:underline font-medium cursor-pointer">Tout cocher</button>
+                        <span class="text-[10px] text-slate-300">|</span>
+                        <button onclick="toggleAllSource(false)" class="text-[10px] text-slate-500 hover:underline font-medium cursor-pointer">Tout décocher</button>
+                    </div>
+                </div>
+
             </div>
         </div>
 
         <div id="empty-state" class="text-center py-16 bg-white rounded-xl border border-slate-200 shadow-sm no-print">
             <div class="text-4xl mb-3">📊</div>
-            <h3 class="text-sm font-semibold text-slate-900">Aucun filtre sélectionné</h3>
-            <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">Cliquez sur une ou plusieurs activités ci-dessus pour générer dynamiquement votre tableau de prévention des risques.</p>
+            <h3 class="text-sm font-semibold text-slate-900">Aucune donnée à afficher</h3>
+            <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">Cochez vos activités générales puis vos activités sources pour construire dynamiquement votre tableau PSS.</p>
         </div>
 
         <div id="results-section" class="hidden bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden print-full-width">
             
             <div class="p-4 bg-slate-50 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 no-print">
                 <div>
-                    <div class="text-xs font-bold text-emerald-600 uppercase tracking-wider">Matrice dynamique personnalisée</div>
-                    <h3 id="report-title" class="text-base font-bold text-slate-900 mt-0.5">Éléments de Sécurité Sélectionnés</h3>
+                    <div class="text-xs font-bold text-emerald-600 uppercase tracking-wider">Génération en temps réel</div>
+                    <h3 class="text-base font-bold text-slate-900 mt-0.5">Matrice d'analyse des risques personnalisée</h3>
                 </div>
                 <button onclick="window.print()" class="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500 cursor-pointer transition-all">
-                    🖨️ Exporter la sélection en PDF
+                    🖨️ Exporter la sélection / Imprimer en PDF
                 </button>
             </div>
 
@@ -109,225 +127,242 @@
 
     <footer class="bg-white border-t border-slate-200 py-3 mt-auto no-print">
         <div class="max-w-7xl mx-auto px-4 text-center text-[11px] text-slate-500 sm:px-6 lg:px-8">
-            Matrice Multi-Filtres &bull; Généré dynamiquement pour votre espace GitHub.
+            Matrice PSS &bull; Version logicielle à filtres croisés automatisés.
         </div>
     </footer>
 
     <script>
-        // Utilisation automatique de la base de données extraite de votre fichier PSS.txt
+        // Base de données structurée issue de votre fichier PSS.txt
         const database = {
             "gros_oeuvre": {
                 label: "Gros Œuvre",
                 sources: {
-                    "inst_chantier": { label: "Installation de chantier", items: [{ risque: "Chute de plain-pied", mesures: "Maintenir les accès dégagés, assurer le nettoyage régulier et mettre en place un balisage adapté.", controles: "Contrôle quotidien des circulations, vérification du rangement et de l’éclairage." }, { risque: "Circulation engins/piétons", mesures: "Mettre en place un plan de circulation séparant les zones piétons et engins.", controles: "Vérification du balisage, contrôle des voies de circulation et respect des consignes." }] },
-                    "terrassement": { label: "Terrassement", items: [{ risque: "Effondrement de fouille", mesures: "Prévoir blindage ou talutage des fouilles selon la profondeur et la nature du terrain.", controles: "Contrôle quotidien des parois et inspection après intempéries." }, { risque: "Réseaux enterrés", mesures: "Réaliser les DICT et localiser les réseaux avant terrassement.", controles: "Vérification des plans réseaux et contrôle du marquage au sol." }, { risque: "Renversement engin", mesures: "Utiliser des engins adaptés au terrain et respecter les charges admissibles.", controles: "Contrôle de stabilité des sols et vérification autorisations conducteurs." }] },
-                    "fouilles": { label: "Fouilles", items: [{ risque: "Chute dans excavation", mesures: "Installer garde-corps et accès sécurisés autour des fouilles.", controles: "Contrôle des protections collectives et accès sécurisés." }] },
-                    "coffrage": { label: "Coffrage", items: [{ risque: "Chute de hauteur", mesures: "Installer garde-corps, lignes de vie et équipements antichute.", controles: "Vérification quotidienne des protections et du port du harnais." }, { risque: "Effondrement coffrage", mesures: "Vérifier la stabilité des coffrages avant bétonnage.", controles: "Inspection technique des coffrages avant mise en charge." }] },
-                    "ferraillage": { label: "Ferraillage", items: [{ risque: "Coupures", mesures: "Utiliser des protections adaptées et ranger correctement les matériaux coupants.", controles: "Contrôle du port des gants et du rangement chantier." }, { risque: "TMS", mesures: "Limiter les manutentions manuelles et utiliser des aides mécaniques.", controles: "Contrôle des postes de travail et des manutentions répétitives." }] },
-                    "betonnage": { label: "Bétonnage", items: [{ risque: "Projection béton", mesures: "Porter les protections adaptées lors du bétonnage.", controles: "Vérification du port des cookies, gants et protections faciales." }, { risque: "Rupture flexible pompe", mesures: "Contrôler les flexibles avant utilisation et sécuriser la zone de pompage.", controles: "Inspection des flexibles et contrôle de la zone interdite." }] },
-                    "maconnerie": { label: "Maçonnerie", items: [{ risque: "Chute de matériaux", mesures: "Installer filets, plinthes et organiser le stockage sécurisé des matériaux.", controles: "Vérification des zones de stockage et protections périphériques." }, { risque: "Utilisation disqueuse", mesures: "Utiliser des disqueuses équipées de carters de protection conformes.", controles: "Contrôle de l’état des disques et des protections." }] },
-                    "dallage": { label: "Dallage", items: [{ risque: "Contact ciment", mesures: "Éviter le contact direct avec le ciment et prévoir des moyens de lavage.", controles: "Vérification du port des gants et présence d’eau de rinçage." }] },
-                    "echafaudage": { label: "Échafaudage", items: [{ risque: "Effondrement", mesures: "Stabiliser les structures provisoires et contrôler les appuis.", controles: "Inspection quotidienne des structures et supports." }, { risque: "Chute d’objet", mesures: "Sécuriser les travaux en hauteur et baliser les zones inférieures.", controles: "Contrôle des filets, plinthes et zones interdites." }] },
-                    "levage": { label: "Levage", items: [{ risque: "Chute de charge", mesures: "Vérifier les accessoires de levage et interdire l’accès sous charge.", controles: "Contrôle des élingues et vérification des zones de sécurité." }, { risque: "Heurt par charge", mesures: "Organiser les manœuvres de levage avec chef de manœuvre.", controles: "Contrôle du balisage et des procédures de levage." }] },
-                    "intemperies": { label: "Intempéries", items: [{ risque: "Vent fort", mesures: "Arrêter les travaux en hauteur et levages en cas de vent fort.", controles: "Contrôle météo quotidien et application des consignes." }, { risque: "Forte chaleur", mesures: "Prévoir hydratation, pauses et zones ombragées.", controles: "Contrôle disponibilité eau potable et pauses." }] }
+                    "inst_chantier": { label: "Installation de chantier", items: [{ risque: "Chute de plain-pied", mesures: "Maintenir les accès dégagés, assurer le nettoyage regular et mettre en place un balisage adapté.", limites: "", controles: "Contrôle quotidien des circulations, vérification du rangement et de l’éclairage." }, { risque: "Circulation engins/piétons", mesures: "Mettre en place un plan de circulation séparant les zones piétons et engins.", limites: "", controles: "Vérification du balisage, contrôle des voies de circulation et respect des consignes." }] },
+                    "terrassement": { label: "Terrassement", items: [{ risque: "Effondrement de fouille", mesures: "Prévoir blindage ou talutage des fouilles selon la profondeur et la nature du terrain.", limites: "", controles: "Contrôle quotidien des parois et inspection après intempéries." }, { risque: "Réseaux enterrés", mesures: "Réaliser les DICT et localiser les réseaux avant terrassement.", limites: "", controles: "Vérification des plans réseaux et contrôle du marquage au sol." }, { risque: "Renversement engin", mesures: "Utiliser des engins adaptés au terrain et respecter les charges admissibles.", limites: "", controles: "Contrôle de stabilité des sols et vérification autorisations conducteurs." }] },
+                    "fouilles": { label: "Fouilles", items: [{ risque: "Chute dans excavation", mesures: "Installer garde-corps et accès sécurisés autour des fouilles.", limites: "", controles: "Contrôle des protections collectives et accès sécurisés." }] },
+                    "coffrage": { label: "Coffrage", items: [{ risque: "Chute de hauteur", mesures: "Installer garde-corps, lignes de vie et équipements antichute.", limites: "", controles: "Vérification quotidienne des protections et du port du harnais." }, { risque: "Effondrement coffrage", mesures: "Vérifier la stabilité des coffrages avant bétonnage.", limites: "", controles: "Inspection technique des coffrages avant mise en charge." }] },
+                    "ferraillage": { label: "Ferraillage", items: [{ risque: "Coupures", mesures: "Utiliser des protections adaptées et ranger correctement les matériaux coupants.", limites: "", controles: "Contrôle du port des gants et du rangement chantier." }, { risque: "TMS", mesures: "Limiter les manutentions manuelles et utiliser des aides mécaniques.", limites: "", controles: "Contrôle des postes de travail et des manutentions répétitives." }] },
+                    "betonnage": { label: "Bétonnage", items: [{ risque: "Projection béton", mesures: "Porter les protections adaptées lors du bétonnage.", limites: "", controles: "Vérification du port des lunettes, gants et protections faciales." }, { risque: "Rupture flexible pompe", mesures: "Contrôler les flexibles avant utilisation et sécuriser la zone de pompage.", limites: "", controles: "Inspection des flexibles et contrôle de la zone interdite." }] },
+                    "maconnerie": { label: "Maçonnerie", items: [{ risque: "Chute de matériaux", mesures: "Installer filets, plinthes et organiser le stockage sécurisé des matériaux.", limites: "", controles: "Vérification des zones de stockage et protections périphériques." }, { risque: "Utilisation disqueuse", mesures: "Utiliser des disqueuses équipées de carters de protection conformes.", limites: "", controles: "Contrôle de l’état des disques et des protections." }] },
+                    "dallage": { label: "Dallage", items: [{ risque: "Contact ciment", mesures: "Éviter le contact direct avec le ciment et prévoir des moyens de lavage.", limites: "", controles: "Vérification du port des gants et présence d’eau de rinçage." }] },
+                    "echafaudage": { label: "Échafaudage", items: [{ risque: "Effondrement", mesures: "Stabiliser les structures provisoires et contrôler les appuis.", limites: "", controles: "Inspection quotidienne des structures et supports." }, { risque: "Chute d’objet", mesures: "Sécuriser les travaux en hauteur et baliser les zones inférieures.", limites: "", controles: "Contrôle des filets, plinthes et zones interdites." }] },
+                    "levage": { label: "Levage", items: [{ risque: "Chute de charge", mesures: "Vérifier les accessoires de levage et interdire l’accès sous charge.", limites: "", controles: "Contrôle des élingues et vérification des zones de sécurité." }, { risque: "Heurt par charge", mesures: "Organiser les manœuvres de levage avec chef de manœuvre.", limites: "", controles: "Contrôle du balisage et des procédures de levage." }] },
+                    "intemperies": { label: "Intempéries", items: [{ risque: "Vent fort", mesures: "Arrêter les travaux en hauteur et levages en cas de vent fort.", limites: "", controles: "Contrôle météo quotidien et application des consignes." }, { risque: "Forte chaleur", mesures: "Prévoir hydratation, pauses et zones ombragées.", limites: "", controles: "Contrôle disponibilité eau potable et pauses." }] }
                 }
             },
             "hauteur_chute": {
                 label: "Hauteur de chute",
                 sources: {
-                    "bord_dalle": { label: "Travail en bord de dalle", items: [{ risque: "Chute de hauteur", mesures: "Installer des garde-corps, lignes de vie et protections collectives adaptées.", controles: "Vérification quotidienne des protections collectives et du port du harnais." }] },
-                    "toiture": { label: "Travail sur toiture", items: [{ risque: "Chute depuis toiture", mesures: "Sécuriser les travaux en toiture avec lignes de vie et accès contrôlés.", controles: "Contrôle des ancrages, accès toiture et conditions météo." }] },
-                    "tremies": { label: "Trémies et ouvertures", items: [{ risque: "Chute dans vide", mesures: "Installer des garde-corps périphériques et baliser les ouvertures.", controles: "Vérification des protections périphériques et du balisage." }] },
-                    "nacelle": { label: "Travail nacelle", items: [{ risque: "Chute depuis nacelle", mesures: "Utiliser des nacelles conformes avec port obligatoire du harnais.", controles: "Contrôle des vérifications périodiques et du port du harnais." }] },
-                    "predalles": { label: "Pose prédalles", items: [{ risque: "Chute dans vide", mesures: "Mettre en place des filets de sécurité et protections périphériques.", controles: "Vérification quotidienne des filets et garde-corps." }] }
+                    "bord_dalle": { label: "Travail en bord de dalle", items: [{ risque: "Chute de hauteur", mesures: "Installer des garde-corps, lignes de vie et protections collectives adaptées.", limites: "", controles: "Vérification quotidienne des protections collectives et du port du harnais." }] },
+                    "toiture": { label: "Travail sur toiture", items: [{ risque: "Chute depuis toiture", mesures: "Sécuriser les travaux en toiture avec lignes de vie et accès contrôlés.", limites: "", controles: "Contrôle des ancrages, accès toiture et conditions météo." }] },
+                    "tremies": { label: "Trémies et ouvertures", items: [{ risque: "Chute dans vide", mesures: "Installer des garde-corps périphériques et baliser les ouvertures.", limites: "", controles: "Vérification des protections périphériques et du balisage." }] },
+                    "nacelle": { label: "Travail nacelle", items: [{ risque: "Chute depuis nacelle", mesures: "Utiliser des nacelles conformes avec port obligatoire du harnais.", limites: "", controles: "Contrôle des vérifications périodiques et du port du harnais." }] },
+                    "predalles": { label: "Pose prédalles", items: [{ risque: "Chute dans vide", mesures: "Mettre en place des filets de sécurité et protections périphériques.", limites: "", controles: "Vérification quotidienne des filets et garde-corps." }] }
                 }
             },
             "terassement": {
                 label: "Terrassement",
                 sources: {
-                    "excav_prof": { label: "Excavation profonde > 1,20 m", items: [{ risque: "Effondrement des parois", mesures: "Mise en place d'un blindage ou un talutage adapté selon la profondeur et la nature du terrain.", controles: "Contrôle quotidien des parois et inspection après intempéries." }] },
-                    "prox_reseaux": { label: "Travaux à proximité réseaux", items: [{ risque: "Contact réseau enterré", mesures: "Réaliser les DICT et localiser précisément les réseaux avant excavation.", controles: "Contrôle des plans réseaux et marquage au sol." }] },
-                    "atmo_conf": { label: "Atmosphère confinée", items: [{ risque: "Manque oxygène / gaz", mesures: "Contrôler l’atmosphère des fouilles profondes et ventiler si nécessaire.", controles: "Vérification des détecteurs gaz et contrôle ventilation." }] }
+                    "excav_prof": { label: "Excavation profonde > 1,20 m", items: [{ risque: "Effondrement des parois", mesures: "Mise en place d'un blindage ou un talutage adapté selon la profondeur et la nature du terrain.", limites: "", controles: "Contrôle quotidien des parois et inspection après intempéries." }] },
+                    "prox_reseaux": { label: "Travaux à proximité réseaux", items: [{ risque: "Contact réseau enterré", mesures: "Réaliser les DICT et localiser précisément les réseaux avant excavation.", limites: "", controles: "Contrôle des plans réseaux et marquage au sol." }] },
+                    "atmo_conf": { label: "Atmosphère confinée", items: [{ risque: "Manque oxygène / gaz", mesures: "Contrôler l’atmosphère des fouilles profondes et ventiler si nécessaire.", limites: "", controles: "Vérification des détecteurs gaz et contrôle ventilation." }] }
                 }
             },
             "chute_outillage": {
                 label: "Chute d'outillage & objet",
                 sources: {
-                    "trav_haut": { label: "Travail en hauteur", items: [{ risque: "Chute d’outils", mesures: "Attacher les outils utilisés en hauteur et sécuriser les zones de travail.", controles: "Vérification des attaches-outils et du balisage des zones." }] },
-                    "lev_mat": { label: "Levage de matériel", items: [{ risque: "Chute de charge", mesures: "Contrôler les accessoires de levage et interdire l’accès sous les charges.", controles: "Vérification des élingues et des zones interdites." }] }
+                    "trav_haut": { label: "Travail en hauteur", items: [{ risque: "Chute d’outils", mesures: "Attacher les outils utilisés en hauteur et sécuriser les zones de travail.", limites: "", controles: "Vérification des attaches-outils et du balisage des zones." }] },
+                    "lev_mat": { label: "Levage de matériel", items: [{ risque: "Chute de charge", mesures: "Contrôler les accessoires de levage et interdire l’accès sous les charges.", limites: "", controles: "Vérification des élingues et des zones interdites." }] }
                 }
             },
             "engin_materiel": {
                 label: "Engin, matériel & produit",
                 sources: {
-                    "conduite": { label: "Conduite d’engins de chantier", items: [{ risque: "Collision engin/piéton", mesures: "Mettre en place un plan de circulation séparant les zones piétons et engins.", controles: "Contrôle du balisage, des voies de circulation et du respect des consignes." }] },
-                    "manoeuvre": { label: "Manœuvre engins", items: [{ risque: "Angle mort", mesures: "Prévoir une aide-manœuvre et des alarmes de recul sur les engins.", controles: "Vérification des alarmes, caméras et présence d’un signaleur." }] },
-                    "chimiques": { label: "Produits chimiques chantier", items: [{ risque: "Contact produit dangereux", mesures: "Mettre à disposition les FDS et utiliser des EPI adaptés.", controles: "Contrôle présence FDS et port des protections individuelles." }] }
+                    "conduite": { label: "Conduite d’engins de chantier", items: [{ risque: "Collision engin/piéton", mesures: "Mettre en place un plan de circulation séparant les zones piétons et engins.", limites: "", controles: "Contrôle du balisage, des voies de circulation et du respect des consignes." }] },
+                    "manoeuvre": { label: "Manœuvre engins", items: [{ risque: "Angle mort", mesures: "Prévoir une aide-manœuvre et des alarmes de recul sur les engins.", limites: "", controles: "Vérification des alarmes, caméras et présence d’un signaleur." }] },
+                    "chimiques": { label: "Produits chimiques chantier", items: [{ risque: "Contact produit dangereux", mesures: "Mettre à disposition les FDS et utiliser des EPI adaptés.", limites: "", controles: "Contrôle présence FDS et port des protections individuelles." }] }
                 }
             },
             "techniques_elec": {
                 label: "Techniques électriques",
                 sources: {
-                    "sous_tension": { label: "Travaux sur installation sous tension", items: [{ risque: "Contact électrique direct", mesures: "Mettre hors tension les installations avant toute intervention et appliquer une procédure de consignation.", controles: "Vérification d’absence de tension et contrôle des consignations." }] },
-                    "coffret": { label: "Utilisation coffret chantier", items: [{ risque: "Contact indirect", mesures: "Installer des protections différentielles et assurer la mise à la terre des équipements.", controles: "Contrôle des dispositifs différentiels et vérification de la terre." }] }
+                    "sous_tension": { label: "Travaux sur installation sous tension", items: [{ risque: "Contact électrique direct", mesures: "Mettre hors tension les installations avant toute intervention et appliquer une procédure de consignation.", limites: "", controles: "Vérification d’absence de tension et contrôle des consignations." }] },
+                    "coffret": { label: "Utilisation coffret chantier", items: [{ risque: "Contact indirect", mesures: "Installer des protections différentielles et assurer la mise à la terre des équipements.", limites: "", controles: "Contrôle des dispositifs différentiels et vérification de la terre." }] }
                 }
             },
             "proximite_voirie": {
                 label: "Proximité voirie",
                 sources: {
-                    "bord_route": { label: "Chantier en bord de route", items: [{ risque: "Collision avec véhicule", mesures: "Mettre en place un balisage et une signalisation réglementaire autour du chantier.", controles: "Contrôle quotidien du balisage et de la signalisation temporaire." }] },
-                    "charg_voirie": { label: "Chargement/déchargement voirie", items: [{ risque: "Heurt par véhicule", mesures: "Délimiter les zones de travail et renforcer la visibilité du personnel.", controles: "Contrôle du port des gilets haute visibilité et du balisage." }] }
+                    "bord_route": { label: "Chantier en bord de route", items: [{ risque: "Collision avec véhicule", mesures: "Mettre en place un balisage et une signalisation réglementaire autour du chantier.", limites: "", controles: "Contrôle quotidien du balisage et de la signalisation temporaire." }] },
+                    "charg_voirie": { label: "Chargement/déchargement voirie", items: [{ risque: "Heurt par véhicule", mesures: "Délimiter les zones de travail et renforcer la visibilité du personnel.", limites: "", controles: "Contrôle du port des gilets haute visibilité et du balisage." }] }
                 }
             },
             "organisation_chantier": {
                 label: "Organisation chantier",
                 sources: {
-                    "mauvaise_org": { label: "Mauvaise organisation générale", items: [{ risque: "Désordre chantier", mesures: "Maintenir le chantier propre et organiser les zones de stockage.", controles: "Contrôle quotidien du rangement et des accès chantier." }] },
-                    "coactivite_org": { label: "Coactivité entreprises", items: [{ risque: "Interférence travaux", mesures: "Planifier les interventions et coordonner les entreprises présentes.", controles: "Réunions de coordination SPS et suivi planning." }] }
+                    "mauvaise_org": { label: "Mauvaise organisation générale", items: [{ risque: "Désordre chantier", mesures: "Maintenir le chantier propre et organiser les zones de stockage.", limites: "", controles: "Contrôle quotidien du rangement et des accès chantier." }] },
+                    "coactivite_org": { label: "Coactivité entreprises", items: [{ risque: "Interférence travaux", mesures: "Planifier les interventions et coordonner les entreprises présentes.", limites: "", controles: "Réunions de coordination SPS et suivi planning." }] }
                 }
             },
             "infrastructures": {
                 label: "Infrastructures et Réseaux",
                 sources: {
-                    "assainissement": { label: "Pose de canalisations / Assainissement", items: [{ risque: "Éboulement de tranchée", mesures: "Mettre en place un blindage de tranchée systématique au-delà de 1.30m ou taluter.", controles: "Vérification visuelle des parois et du blindage avant la descente des compagnons." }] },
-                    "fonçage": { label: "Forage et Fonçage horizontal", items: [{ risque: "Heurt de réseaux existants non répertoriés", mesures: "Procédure d'excavation douce (aspiratrice ou manuelle) aux abords des fuseaux.", controles: "Présence permanente du plan de synthèse des réseaux validé sur site." }] }
+                    "assainissement": { label: "Pose de canalisations / Assainissement", items: [{ risque: "Éboulement de tranchée", mesures: "Mettre en place un blindage de tranchée systématique au-delà de 1.30m ou taluter.", limites: "", controles: "Vérification visuelle des parois et du blindage avant la descente des compagnons." }] },
+                    "fonçage": { label: "Forage et Fonçage horizontal", items: [{ risque: "Heurt de réseaux existants non répertoriés", mesures: "Procédure d'excavation douce (aspiratrice ou manuelle) aux abords des fuseaux.", limites: "", controles: "Présence permanente du plan de synthèse des réseaux validé sur site." }] }
                 }
             },
             "second_oeuvre": {
                 label: "Second Œuvre & Finitions",
                 sources: {
-                    "cloisonnement": { label: "Pose de cloisons et plaques de plâtre", items: [{ risque: "Blessures / TMS par manutention de plaques", mesures: "Utiliser des lève-plaques mécaniques et des chariots de transport adaptés.", controles: "Vérification de la mise à disposition des équipements d'aide à la manutention." }] },
-                    "menuiserie": { label: "Pose de menuiseries extérieures", items: [{ risque: "Chute dans le vide (baies non vitrées)", mesures: "Conserver les garde-corps provisoires jusqu'au moment de la pose définitive de la menuiserie.", controles: "Inspection des fixations de sécurité avant le retrait des protections collectives." }] }
+                    "cloisonnement": { label: "Pose de cloisons et plaques de plâtre", items: [{ risque: "Blessures / TMS par manutention de plaques", mesures: "Utiliser des lève-plaques mécaniques et des chariots de transport adaptés.", limites: "", controles: "Vérification de la mise à disposition des équipements d'aide à la manutention." }] },
+                    "menuiserie": { label: "Pose de menuiseries extérieures", items: [{ risque: "Chute dans le vide (baies non vitrées)", mesures: "Conserver les garde-corps provisoires jusqu'au moment de la pose définitive de la menuiserie.", limites: "", controles: "Inspection des fixations de sécurité avant le retrait des protections collectives." }] }
                 }
             },
             "impetrants": {
                 label: "Impétrants",
                 sources: {
-                    "trav_manuel": { label: "Travail manuel en fouille", items: [{ risque: "Contact accidentel réseau", mesures: "Baliser les zones sensibles et limiter les accès.", controles: "Contrôle signalisation et zones interdites." }] },
-                    "cond_meteo": { label: "Conditions météo défavorables", items: [{ risque: "Mauvaise visibilité réseaux", mesures: "Marquer clairement les réseaux au sol avant travaux.", controles: "Vérification du marquage et plans disponibles." }] },
-                    "coactivite_concess": { label: "Coactivité avec concessionnaires", items: [{ risque: "Mauvaise coordination", mesures: "Organiser une réunion préalable avec les intervenants.", controles: "Contrôle coordination et diffusion consignes." }] },
-                    "signalisation_insuf": { label: "Signalisation réseau insuffisante", items: [{ risque: "Erreur excavation", mesures: "Utiliser les plans actualisés et méthodes adaptées.", controles: "Vérification procédures terrassement." }] },
-                    "egouttage": { label: "Travaux à proximité égouttage", items: [{ risque: "Atmosphère dangereuse", mesures: "Contrôler l’atmosphère avant intervention en fouille.", controles: "Vérification détecteurs gaz et ventilation." }] },
-                    "marteau_piqueur": { label: "Utilisation marteau-piqueur", items: [{ risque: "Rupture conduite", mesures: "Prévoir un arrêt immédiat des travaux en cas d’incident.", controles: "Contrôle application procédure urgence." }] },
-                    "travaux_voirie": { label: "Travaux voirie", items: [{ risque: "Circulation proche impétrants", mesures: "Délimiter les zones d’évolution des engins.", controles: "Contrôle circulation et balisage chantier." }] },
-                    "urgence_reseau": { label: "Intervention urgence réseau", items: [{ risque: "Stress / précipitation", mesures: "Planifier les travaux et limiter les interventions en urgence.", controles: "Contrôle organisation chantier et briefing sécurité." }] },
-                    "reseau_inconnu": { label: "Réseau inconnu découvert", items: [{ risque: "Réaction inadaptée", mesures: "Former les équipes aux procédures d’urgence et d’évacuation.", controles: "Vérification exercices sécurité et consignes affichées." }] }
+                    "trav_manuel": { label: "Travail manuel en fouille", items: [{ risque: "Contact accidentel réseau", mesures: "Baliser les zones sensibles et limiter les accès.", limites: "", controles: "Contrôle signalisation et zones interdites." }] },
+                    "cond_meteo": { label: "Conditions météo défavorables", items: [{ risque: "Mauvaise visibilité réseaux", mesures: "Marquer clairement les réseaux au sol avant travaux.", limites: "", controles: "Vérification du marquage et plans disponibles." }] },
+                    "coactivite_concess": { label: "Coactivité avec concessionnaires", items: [{ risque: "Mauvaise coordination", mesures: "Organiser une réunion préalable avec les intervenants.", limites: "", controles: "Contrôle coordination et diffusion consignes." }] },
+                    "signalisation_insuf": { label: "Signalisation réseau insuffisante", items: [{ risque: "Erreur excavation", mesures: "Utiliser les plans actualisés et méthodes adaptées.", limites: "", controles: "Vérification procédures terrassement." }] },
+                    "egouttage": { label: "Travaux à proximité égouttage", items: [{ risque: "Atmosphère dangereuse", mesures: "Contrôler l’atmosphère avant intervention en fouille.", limites: "", controles: "Vérification détecteurs gaz et ventilation." }] },
+                    "marteau_piqueur": { label: "Utilisation marteau-piqueur", items: [{ risque: "Rupture conduite", mesures: "Prévoir un arrêt immédiat des travaux en cas d’incident.", limites: "", controles: "Contrôle application procédure urgence." }] },
+                    "travaux_voirie": { label: "Travaux voirie", items: [{ risque: "Circulation proche impétrants", mesures: "Délimiter les zones d’évolution des engins.", limites: "", controles: "Contrôle circulation et balisage chantier." }] },
+                    "urgence_reseau": { label: "Intervention urgence réseau", items: [{ risque: "Stress / précipitation", mesures: "Planifier les travaux et limiter les interventions en urgence.", limites: "", controles: "Contrôle organisation chantier et briefing sécurité." }] },
+                    "reseau_inconnu": { label: "Réseau inconnu découvert", items: [{ risque: "Réaction inadaptée", mesures: "Former les équipes aux procédures d’urgence et d’évacuation.", limites: "", controles: "Vérification exercices sécurité et consignes affichées." }] }
                 }
             }
         };
 
-        // Tableaux pour stocker les sélections actives (Multi-choix)
-        let selectedMainActivities = [];
-        let selectedSourceActivities = [];
+        // Tableaux de stockage des états cochés
+        let checkedMainKeys = [];
+        let checkedSourceKeys = [];
 
-        const mainContainer = document.getElementById('main-badges-container');
-        const sourceContainer = document.getElementById('source-badges-container');
+        // Éléments DOM
+        const mainDropdown = document.getElementById('main-dropdown');
+        const sourceDropdown = document.getElementById('source-dropdown');
+        const sourceActions = document.getElementById('source-actions');
+        const countMain = document.getElementById('count-main');
+        const countSource = document.getElementById('count-source');
         const emptyState = document.getElementById('empty-state');
         const resultsSection = document.getElementById('results-section');
         const tableBody = document.getElementById('table-body');
-        const btnReset = document.getElementById('btn-reset');
 
-        // Génère les boutons (badges) d'activités principales au démarrage
-        function initMainBadges() {
-            mainContainer.innerHTML = '';
+        // 1. Initialise la liste des Activités Générales avec des cases à cocher
+        function initMainDropdown() {
+            mainDropdown.innerHTML = '';
             for (const key in database) {
-                const btn = document.createElement('button');
-                btn.type = "button";
-                btn.textContent = database[key].label;
-                btn.className = "px-3 py-1.5 rounded-full text-xs font-medium border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 transition-all cursor-pointer";
+                const div = document.createElement('div');
+                div.className = "flex items-center gap-2 p-1 hover:bg-slate-200/60 rounded transition-colors";
+                div.innerHTML = `
+                    <input type="checkbox" id="main-${key}" value="${key}" class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                    <label for="main-${key}" class="text-xs font-medium text-slate-700 cursor-pointer select-none flex-grow">${database[key].label}</label>
+                `;
                 
-                btn.onclick = () => toggleMainActivity(key, btn);
-                mainContainer.appendChild(btn);
+                // Écouteur de changement sur la case
+                div.querySelector('input').addEventListener('change', function() {
+                    handleMainCheckboxChange(this.value, this.checked);
+                });
+                
+                mainDropdown.appendChild(div);
             }
         }
 
-        // Gère l'activation / désactivation d'une activité générale
-        function toggleMainActivity(key, element) {
-            if (selectedMainActivities.includes(key)) {
-                selectedMainActivities = selectedMainActivities.filter(item => item !== key);
-                element.className = "px-3 py-1.5 rounded-full text-xs font-medium border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 transition-all cursor-pointer";
+        // Action lors du clic sur une activité générale
+        function handleMainCheckboxChange(key, isChecked) {
+            if (isChecked) {
+                if (!checkedMainKeys.includes(key)) checkedMainKeys.push(key);
             } else {
-                selectedMainActivities.push(key);
-                element.className = "px-3 py-1.5 rounded-full text-xs font-medium border border-indigo-600 bg-indigo-600 text-white shadow-sm transition-all cursor-pointer";
+                checkedMainKeys = checkedMainKeys.filter(k => k !== key);
+                // Si on décoche le parent, on doit retirer ses enfants de la sélection active
+                const parentSources = Object.keys(database[key].sources);
+                checkedSourceKeys = checkedSourceKeys.filter(srcKey => !parentSources.includes(srcKey));
             }
             
-            // Nettoyer les sources qui n'appartiennent plus aux activités sélectionnées
-            selectedSourceActivities = selectedSourceActivities.filter(srcKey => {
-                return selectedMainActivities.some(mKey => database[mKey].sources[srcKey]);
-            });
-
-            updateSourceBadges();
+            countMain.textContent = checkedMainKeys.length;
+            renderSourceDropdown();
             renderTable();
         }
 
-        // Génère ou met à jour les badges d'activités sources d'après la sélection parente
-        function updateSourceBadges() {
-            if (selectedMainActivities.length === 0) {
-                sourceContainer.innerHTML = '<span class="text-xs text-slate-400 italic">Sélectionnez au moins une activité générale pour voir ses sources.</span>';
+        // 2. Génère dynamiquement les sous-activités sources disponibles
+        function renderSourceDropdown() {
+            if (checkedMainKeys.length === 0) {
+                sourceDropdown.innerHTML = `<div class="text-xs text-slate-400 italic p-1 text-center">Veuillez cocher au moins une activité générale à gauche.</div>`;
+                sourceActions.style.display = 'none';
+                countSource.textContent = '0';
                 return;
             }
 
-            sourceContainer.innerHTML = '';
-            selectedMainActivities.forEach(mainKey => {
-                const sources = database[mainKey].sources;
-                for (const srcKey in sources) {
-                    const isSelected = selectedSourceActivities.includes(srcKey);
-                    const btn = document.createElement('button');
-                    btn.type = "button";
-                    btn.textContent = `${sources[srcKey].label} (${database[mainKey].label})`;
-                    
-                    if (isSelected) {
-                        btn.className = "px-3 py-1.5 rounded-full text-xs font-medium border border-emerald-600 bg-emerald-600 text-white shadow-sm transition-all cursor-pointer";
-                    } else {
-                        btn.className = "px-3 py-1.5 rounded-full text-xs font-medium border border-slate-300 bg-slate-50 text-slate-600 hover:bg-slate-100 transition-all cursor-pointer";
-                    }
+            sourceDropdown.innerHTML = '';
+            sourceActions.style.display = 'flex';
 
-                    btn.onclick = () => toggleSourceActivity(srcKey, btn);
-                    sourceContainer.appendChild(btn);
+            checkedMainKeys.forEach(mainKey => {
+                const sources = database[mainKey].sources;
+                
+                // Titre de groupe pour s'y retrouver
+                const groupTitle = document.createElement('div');
+                groupTitle.className = "text-[10px] font-bold text-indigo-600 bg-indigo-50/80 px-1.5 py-0.5 rounded mt-1 first:mt-0";
+                groupTitle.textContent = database[mainKey].label.toUpperCase();
+                sourceDropdown.appendChild(groupTitle);
+
+                for (const srcKey in sources) {
+                    const isChecked = checkedSourceKeys.includes(srcKey);
+                    const div = document.createElement('div');
+                    div.className = "flex items-center gap-2 p-1 hover:bg-slate-200/60 rounded transition-colors pl-3";
+                    div.innerHTML = `
+                        <input type="checkbox" id="src-${srcKey}" value="${srcKey}" ${isChecked ? 'checked' : ''} class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+                        <label for="src-${srcKey}" class="text-xs text-slate-700 cursor-pointer select-none flex-grow">${sources[srcKey].label}</label>
+                    `;
+
+                    div.querySelector('input').addEventListener('change', function() {
+                        handleSourceCheckboxChange(this.value, this.checked);
+                    });
+
+                    sourceDropdown.appendChild(div);
                 }
             });
+
+            countSource.textContent = checkedSourceKeys.length;
         }
 
-        // Gère l'activation / désactivation d'une activité source
-        function toggleSourceActivity(srcKey, element) {
-            if (selectedSourceActivities.includes(srcKey)) {
-                selectedSourceActivities = selectedSourceActivities.filter(item => item !== srcKey);
-                element.className = "px-3 py-1.5 rounded-full text-xs font-medium border border-slate-300 bg-slate-50 text-slate-600 hover:bg-slate-100 transition-all cursor-pointer";
+        // Action lors du clic sur une activité source
+        function handleSourceCheckboxChange(srcKey, isChecked) {
+            if (isChecked) {
+                if (!checkedSourceKeys.includes(srcKey)) checkedSourceKeys.push(srcKey);
             } else {
-                selectedSourceActivities.push(srcKey);
-                element.className = "px-3 py-1.5 rounded-full text-xs font-medium border border-emerald-600 bg-emerald-600 text-white shadow-sm transition-all cursor-pointer";
+                checkedSourceKeys = checkedSourceKeys.filter(k => k !== srcKey);
             }
+            countSource.textContent = checkedSourceKeys.length;
             renderTable();
         }
 
-        // Compile et rafraîchit dynamiquement le tableau réglementaire
+        // 3. Moteur de rendu réactif pour la Matrice à 5 colonnes
         function renderTable() {
             tableBody.innerHTML = '';
             
-            if (selectedMainActivities.length === 0) {
+            // Si aucune activité parente n'est cochée, on masque le tableau
+            if (checkedMainKeys.length === 0) {
                 resultsSection.classList.add('hidden');
                 emptyState.classList.remove('hidden');
-                btnReset.classList.add('hidden');
                 return;
             }
 
-            btnReset.classList.remove('hidden');
-            let matchCount = 0;
+            let linesRendered = 0;
 
-            selectedMainActivities.forEach(mainKey => {
+            checkedMainKeys.forEach(mainKey => {
                 const mainLabel = database[mainKey].label;
                 const sources = database[mainKey].sources;
 
                 for (const srcKey in sources) {
-                    // Si l'utilisateur a filtré des sources spécifiques, on n'affiche que celles-ci.
-                    // S'il n'a sélectionné aucune source spécifique, on affiche TOUTES les sources de l'activité par défaut.
-                    if (selectedSourceActivities.length > 0 && !selectedSourceActivities.includes(srcKey)) {
+                    // Si l'utilisateur a coché des sources précises, on n'affiche que celles-ci.
+                    // S'il n'a coché AUCUNE source du tout dans la colonne de droite, on affiche TOUT par défaut pour l'aider.
+                    if (checkedSourceKeys.length > 0 && !checkedSourceKeys.includes(srcKey)) {
                         continue;
                     }
 
                     const sourceData = sources[srcKey];
                     sourceData.items.forEach(item => {
-                        matchCount++;
+                        linesRendered++;
                         const tr = document.createElement('tr');
                         tr.className = "hover:bg-slate-50 transition-colors divide-x divide-slate-200 odd:bg-slate-50/30";
                         tr.innerHTML = `
@@ -342,7 +377,7 @@
                 }
             });
 
-            if (matchCount > 0) {
+            if (linesRendered > 0) {
                 emptyState.classList.add('hidden');
                 resultsSection.classList.remove('hidden');
             } else {
@@ -351,17 +386,36 @@
             }
         }
 
-        // Remise à zéro complète des filtres
-        function resetFilters() {
-            selectedMainActivities = [];
-            selectedSourceActivities = [];
-            initMainBadges();
-            updateSourceBadges();
+        // Fonctions globales : Tout cocher / Tout décocher (Activités Générales)
+        function toggleAllMain(checkAll) {
+            checkedMainKeys = [];
+            const checkboxes = mainDropdown.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(cb => {
+                cb.checked = checkAll;
+                if (checkAll) checkedMainKeys.push(cb.value);
+            });
+            
+            if (!checkAll) checkedSourceKeys = []; // On efface tout si on décoche tout
+            
+            countMain.textContent = checkedMainKeys.length;
+            renderSourceDropdown();
             renderTable();
         }
 
-        // Lancement au chargement
-        initMainBadges();
+        // Fonctions globales : Tout cocher / Tout décocher (Activités Sources)
+        function toggleAllSource(checkAll) {
+            checkedSourceKeys = [];
+            const checkboxes = sourceDropdown.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(cb => {
+                cb.checked = checkAll;
+                if (checkAll) checkedSourceKeys.push(cb.value);
+            });
+            countSource.textContent = checkedSourceKeys.length;
+            renderTable();
+        }
+
+        // Initialisation de démarrage
+        initMainDropdown();
     </script>
 </body>
 </html>
